@@ -1,0 +1,17 @@
+{
+  "name": "Print ID",
+  "description": "Cetak label identitas pasien untuk diprint di stiker identitas berdasarkan registrasi j-care",
+  "version": "0.2",
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "permissions": [
+    "tabs", "http://192.168.1.99/j-care/visits/"
+  ],
+  "page_action": {
+      "default_title": "Print ID",
+      "default_icon": "print_16x16.png"
+  },
+  "manifest_version": 2,
+  "web_accessible_resources": ["print_16x16.png"]
+}
