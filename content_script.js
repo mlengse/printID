@@ -66,9 +66,9 @@ $("#label2PDF").bind('click', function(){
 		}
 		function pusk(){
 			if(jaminan){
-				pusk = "PKM Sibela " + jaminan;
+				pusk = "PKM Ngoresan " + jaminan;
 			}else{
-				pusk = "PKM Sibela";
+				pusk = "PKM Ngoresan";
 			}
 			return pusk;
 		}
