@@ -1,4 +1,5 @@
-url = chrome.extension.getURL('print_16x16.png'); 
+console.log('di dalam content');
+var url = chrome.runtime.getURL('print_16x16.png'); 
 var al;
 var empt;
 if($('#label2PDF').length == 0 ){
