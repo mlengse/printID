@@ -1,17 +1,21 @@
-let logoUrl = chrome.runtime.getURL('print_16x16.png'); 
-let al;
-let empt;
 if($('#label2PDF').length == 0 ){
 	if($('button.cancel').length){
-		$('button.cancel').after('<button id=label2PDF onclick="return false;" style="padding: 4px 5px 5px 30px; background: url(' + logoUrl + ') white no-repeat 5px 6px; border: 1px solid #B2B2B2;  -webkit-border-radius : 4px; -moz-border-radius : 4px; border-radius: 4px; position: relative; top: 2px; margin: 0 0 0 2px;">Cetak Label</button><iframe name="dinda"></iframe>');
-	} else if($('#tgllahir').length) {
-		$('a.back').after('<button id=label2PDF onclick="return false;" style="margin : 10px 0 0 10px; padding : 5px 5px 5px 30px; border : 1px solid #ddd; -webkit-border-radius : 4px; background : url(' + logoUrl + ') no-repeat center left; font: 11px/14px verdana, geneva, sans-serif;">Cetak Label</button><iframe name="dinda"></iframe>');
+		$('button.cancel').after('<button id=label2PDF onclick="return false;" style="padding: 4px 5px 5px 30px; background: url(' + chrome.runtime.getURL('print_16x16.png') + ') white no-repeat 5px 6px; border: 1px solid #B2B2B2;  -webkit-border-radius : 4px; -moz-border-radius : 4px; border-radius: 4px; position: relative; top: 2px; margin: 0 0 0 2px;">Cetak Label</button><iframe name="dinda" style="display: none;"></iframe>');
+	} 
+	// if($('#idSimpan').length){
+	// 	$('#idSimpan').after('<button id=label2PDF onclick="return false;" style="padding: 4px 5px 5px 30px; background: url(' + chrome.runtime.getURL('print_16x16.png') + ') white no-repeat 5px 6px; border: 1px solid #B2B2B2;  -webkit-border-radius : 4px; -moz-border-radius : 4px; border-radius: 4px; position: relative; top: 2px; margin: 0 0 0 2px;">Cetak Label</button><iframe name="dinda" style="display: none;"></iframe>');
+	// } 
+	if($('#tgllahir').length) {
+		$('a.back').after('<button id=label2PDF onclick="return false;" style="margin : 10px 0 0 10px; padding : 5px 5px 5px 30px; border : 1px solid #ddd; -webkit-border-radius : 4px; background : url(' + chrome.runtime.getURL('print_16x16.png') + ') no-repeat center left; font: 11px/14px verdana, geneva, sans-serif;">Cetak Label</button><iframe name="dinda" style="display: none;"></iframe>');
 	}
 	
 }
 
 $("#label2PDF").bind('click', function(){
-	if($('#sex').val().length){
+	$('iframe[name="dinda"]').show()
+	let al;
+	let empt;
+	if($('#sex').length && $('#sex').val().length){
 		let pasienTglLahir = $('#tgllahir').val();
 		let nik = $('#nik').val();
 		let pasienUmur = pasienUm();
