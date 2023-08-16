@@ -19,7 +19,7 @@
   "manifest_version": 3,
   "web_accessible_resources": [
     {
-      "resources": ["print_16x16.png"],
+      "resources": ["print_16x16.png", "drug_16x16.png"],
       "matches": ["<all_urls>"]
     }
   ]

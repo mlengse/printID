@@ -161,18 +161,26 @@
             _textCounter = _textCounter + 1;
         }
         
-		$.DrawPDF = function() {
+		let url = ''
+		$.DrawPDF = function(frame) {
+			// $(`iframe[name="${frame}"]`).hide()
+			// window.close(url, frame);
+
+			// pdfoutput = ''
+
+
 			setupVersion();
 			setupFonts();
 			setupXObject();
 			setupResources();
-            //execute the xobjects do
+						//execute the xobjects do
 			setupPage();
 			setupPages();
 			setupOutlines();
 			setupCatalog();
 			setupTrailer();
-			//console.log(pdfoutput);
+
+			//console.log(pdfoutput);
 			url = 'data:application/pdf;base64,' + Base64.encode(pdfoutput);
 			//document.location.href = 'data:application/pdf;base64,' + Base64.encode(pdfoutput);
 			//window.open(a,'_blank');
@@ -180,12 +188,18 @@
 			//console.log(exist);
 			//if(exist < 0) {
 			//var win = 
-			window.open(url, 'dinda');
+			window.open(url, frame);
+			// $(`iframe[name="${frame}"]`).attr( 'src', function ( i, val ) { return val; });
+			// document.getElementsByName(frame).contentWindow.reload()
+			$(`iframe[name="${frame}"]`).attr("src", $(`iframe[name="${frame}"]`).attr("src"));
+			$(`iframe[name="${frame}"]`).show()
 			//window.frames["dinda"].focus(); //if (win) { win.frames["dinda"].print(); }
 			//window.frames["dinda"].print(); //if (win) { win.frames["dinda"].print(); }
 				//window.open(url,'_blank');
 				//console.log(window.location.href.indexOf(url));
-			//}		};
+			//}
+				
+		};
 
 		function setupVersion() {
 			pdfoutput = pdfoutput+'%PDF-1.4' + '\n';
@@ -196,8 +210,11 @@
 			objCounter=objCounter+1;
 			byteArry[objCounter]=pdfoutput.length;
 			catalogNumber = objCounter;
-			pdfoutput = pdfoutput+objCounter+' 0 obj' + '\n';			pdfoutput = pdfoutput+'<< /Type /Catalog' + '\n';
-			pdfoutput = pdfoutput+'/Outlines '+outlinesNumber+' 0 R' + '\n';			pdfoutput = pdfoutput+'/Pages ' + pagesNumber + ' 0 R' + '\n';			pdfoutput = pdfoutput+'>>' + '\n';
+			pdfoutput = pdfoutput+objCounter+' 0 obj' + '\n';
+			pdfoutput = pdfoutput+'<< /Type /Catalog' + '\n';
+			pdfoutput = pdfoutput+'/Outlines '+outlinesNumber+' 0 R' + '\n';
+			pdfoutput = pdfoutput+'/Pages ' + pagesNumber + ' 0 R' + '\n';
+			pdfoutput = pdfoutput+'>>' + '\n';
 			pdfoutput = pdfoutput+'endobj' + '\n';
 			return "";
 		}
@@ -206,7 +223,10 @@
 			objCounter=objCounter+1;
 			byteArry[objCounter]=pdfoutput.length;
 			outlinesNumber = objCounter;
-			pdfoutput = pdfoutput+objCounter+' 0 obj' + '\n';			pdfoutput = pdfoutput+'<< /Type Outlines' + '\n';			pdfoutput = pdfoutput+'/Count 0' + '\n';			pdfoutput = pdfoutput+'>>' + '\n';
+			pdfoutput = pdfoutput+objCounter+' 0 obj' + '\n';
+			pdfoutput = pdfoutput+'<< /Type Outlines' + '\n';
+			pdfoutput = pdfoutput+'/Count 0' + '\n';
+			pdfoutput = pdfoutput+'>>' + '\n';
 			pdfoutput = pdfoutput+'endobj' + '\n';
 			return "";
 		}
@@ -215,11 +235,15 @@
 			objCounter=objCounter+1;
 			byteArry[objCounter]=pdfoutput.length;
 			pagesNumber=objCounter;
-			pdfoutput = pdfoutput+objCounter+' 0 obj' + '\n';			pdfoutput = pdfoutput+'<< /Type /Pages' + '\n';			pdfoutput = pdfoutput+'/Kids ['+'\n';
+			pdfoutput = pdfoutput+objCounter+' 0 obj' + '\n';
+			pdfoutput = pdfoutput+'<< /Type /Pages' + '\n';
+			pdfoutput = pdfoutput+'/Kids ['+'\n';
 			for (var x=1;x<=numberOfPages;x++) {
 				 pdfoutput = pdfoutput + pageNumbersArry[x] + ' 0 R' + '\n';
 			}
-			pdfoutput = pdfoutput + ']' + '\n';			pdfoutput = pdfoutput+'/Count ' + numberOfPages + '\n';			pdfoutput = pdfoutput+'>>' + '\n';
+			pdfoutput = pdfoutput + ']' + '\n';
+			pdfoutput = pdfoutput+'/Count ' + numberOfPages + '\n';
+			pdfoutput = pdfoutput+'>>' + '\n';
 			pdfoutput = pdfoutput+'endobj' + '\n';
 			return "";
 		}
@@ -230,7 +254,9 @@
 			byteArry[objCounter]=pdfoutput.length;
 			pageCounter=pageCounter+1;
 			pageNumbersArry[pageCounter]=objCounter;
-			pdfoutput = pdfoutput+objCounter+' 0 obj' + '\n';			pdfoutput = pdfoutput+'<< /Type /Page' + '\n';			pdfoutput = pdfoutput+'/Parent '+ (objCounter+2*numberOfPages) +' 0 R' + '\n';
+			pdfoutput = pdfoutput+objCounter+' 0 obj' + '\n';
+			pdfoutput = pdfoutput+'<< /Type /Page' + '\n';
+			pdfoutput = pdfoutput+'/Parent '+ (objCounter+2*numberOfPages) +' 0 R' + '\n';
 			pdfoutput = pdfoutput+'/MediaBox [0 0 ' + _paperWidthPt + ' ' + _paperHeightPt + ']' + '\n';
 			pdfoutput = pdfoutput+'/Contents '+(objCounter+1)+' 0 R' + '\n';
 			pdfoutput = pdfoutput+'/Resources ' + resourcesNumber + ' 0 R' + '\n';
@@ -245,7 +271,8 @@
                     streamoutput = streamoutput+'/lm' + y + x + ' Do' + '\n';
                 }
             }	
-			pdfoutput = pdfoutput+'<< /Length ' + streamoutput.length + ' >>' + '\n';			pdfoutput = pdfoutput+'stream'  + '\n';
+			pdfoutput = pdfoutput+'<< /Length ' + streamoutput.length + ' >>' + '\n';
+			pdfoutput = pdfoutput+'stream'  + '\n';
 			pdfoutput = pdfoutput+streamoutput;
 			pdfoutput = pdfoutput+'endstream'  + '\n';
 			pdfoutput = pdfoutput+'endobj' + '\n';
@@ -260,8 +287,11 @@
 			fontCounter = fontCounter + 1;
 			fontNumbersArry[fontCounter] = objCounter;
 			pdfoutput = pdfoutput+objCounter+' 0 obj' + '\n';
-			pdfoutput = pdfoutput+'<< /Type /Font' + '\n';			pdfoutput = pdfoutput+'/BaseFont /Helvetica' + '\n';
-			pdfoutput = pdfoutput+'/Subtype /Type1' + '\n';			pdfoutput = pdfoutput+'/Encoding /WinAnsiEncoding' + '\n';			pdfoutput = pdfoutput+'>>' + '\n';
+			pdfoutput = pdfoutput+'<< /Type /Font' + '\n';
+			pdfoutput = pdfoutput+'/BaseFont /Helvetica' + '\n';
+			pdfoutput = pdfoutput+'/Subtype /Type1' + '\n';
+			pdfoutput = pdfoutput+'/Encoding /WinAnsiEncoding' + '\n';
+			pdfoutput = pdfoutput+'>>' + '\n';
 			pdfoutput = pdfoutput+'endobj' + '\n';
 			return "";
 
@@ -314,7 +344,8 @@
 					pdfoutput = pdfoutput +'>>'+'\n';
 					pdfoutput = pdfoutput +'>>'+'\n'; //resources
 					
-					pdfoutput = pdfoutput+'/Length ' + streamoutput.length + ' >>' + '\n';					pdfoutput = pdfoutput+'stream'  + '\n';
+					pdfoutput = pdfoutput+'/Length ' + streamoutput.length + ' >>' + '\n';
+					pdfoutput = pdfoutput+'stream'  + '\n';
 					pdfoutput = pdfoutput+streamoutput;
 					pdfoutput = pdfoutput+'endstream'  + '\n';
 					pdfoutput = pdfoutput+'endobj' + '\n';
@@ -329,9 +360,11 @@
 			byteArry[objCounter]=pdfoutput.length;
 			resourcesNumber = objCounter;
 			pdfoutput = pdfoutput+objCounter+' 0 obj' + '\n';	
-			pdfoutput = pdfoutput+'<<' + '\n';				pdfoutput = pdfoutput+'/ProcSet [/PDF /Text /ImageB /ImageC /ImageI]' + '\n';
+			pdfoutput = pdfoutput+'<<' + '\n';	
+			pdfoutput = pdfoutput+'/ProcSet [/PDF /Text /ImageB /ImageC /ImageI]' + '\n';
 			pdfoutput = pdfoutput+'/Font <<' + '\n';
-			for (var x=1;x<=numberOfFonts;x++) {						pdfoutput = pdfoutput+'/F1 ' + fontNumbersArry[x] + ' 0 R' + '\n';		
+			for (var x=1;x<=numberOfFonts;x++) {		
+				pdfoutput = pdfoutput+'/F1 ' + fontNumbersArry[x] + ' 0 R' + '\n';		
 			}
 			pdfoutput = pdfoutput+'>>' + '\n';
 			pdfoutput = pdfoutput+'/XObject <<' + '\n';
@@ -342,7 +375,8 @@
             }	
 			pdfoutput = pdfoutput+'>>' + '\n';
 			pdfoutput = pdfoutput+'>>' + '\n';	
-				pdfoutput = pdfoutput+'endobj' + '\n';
+	
+			pdfoutput = pdfoutput+'endobj' + '\n';
 			return "";
 		}
 
@@ -362,7 +396,8 @@
 
 			pdfoutput = pdfoutput+'trailer' + '\n';
 			pdfoutput = pdfoutput+'<< /Size ' + objCounterStr + '\n';
-			pdfoutput = pdfoutput+'/Root '+catalogNumber+' 0 R' + '\n';			pdfoutput = pdfoutput+'>>' + '\n';
+			pdfoutput = pdfoutput+'/Root '+catalogNumber+' 0 R' + '\n';
+			pdfoutput = pdfoutput+'>>' + '\n';
 			pdfoutput = pdfoutput+'startxref' + '\n';
 			pdfoutput = pdfoutput+startxrefStr + '\n';
 			pdfoutput = pdfoutput+'%%EOF' + '\n';
