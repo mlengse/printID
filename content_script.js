@@ -158,18 +158,16 @@ if($('#drug2PDF').length == 0 ){
 
 	function clickLabel(a) {
 		let obat = Object.assign({}, obats[a.currentTarget.id.split('.')[0]])
-		console.log(obat)
 		obat.ket = ''
 		obat.ket2 = ''
-		obat.nama = obat.nama.replace(/[^a-zA-Z0-9]/g, " ")
-		// .split(',').join(' ')
-		// .split('.').join(' ')
-		// .split(':').join(' ')
-		// .split('(').join(' ')
-		// .split(')').join(' ')
-		// .split(' ')
+		obat.nama = obat.nama.replace(/[()]/g, " ")
+		
+		let tanggal = document.querySelector('.tanggal').textContent.split(',')[1].trim()
 
-		while(obat.nama.length > 35){
+		// console.log(tanggal)
+		console.log(obat)
+
+		while(obat.nama.length > 30){
 			obat.nama = obat.nama.trim().split(' ')
 			obat.ket = `${obat.nama.pop()} ${obat.ket}`
 			obat.nama = obat.nama.join(' ').trim()
@@ -196,6 +194,11 @@ if($('#drug2PDF').length == 0 ){
 			jp: 'PKM Jayengan ' + dataPasienArr[10].querySelector('b').textContent.trim(),
 		}
 
+		while(dataPasien.nama.length > 30){
+			dataPasien.nama = dataPasien.nama.trim().split(' ')
+			dataPasien.nama.pop()
+			dataPasien.nama = dataPasien.nama.join(' ').trim()
+		}
 
 		if(!dataPasien.umur.length) {
 			alert('mohon cek tgl lahir dan umur')
@@ -239,9 +242,10 @@ if($('#drug2PDF').length == 0 ){
 			}
 		});
 		$.AddText(wid + 0.05,1.4,dataPasien.rm,16);
+		$.AddText(wid + 0.05,1.7,`${tanggal}`,7);
 		$.AddText(0.1,1.25,dataPasien.nama,10);
-		$.AddText(0.1,1.13,`${dataPasien.nik} ${dataPasien.jp}`,8);
-		$.AddText(0.1,1,`${dataPasien.jk} ${dataPasien.tglLahir} ${dataPasien.umur}`,8);
+		$.AddText(0.1,1.13,`${dataPasien.jp}`,8);
+		$.AddText(0.1,1,`${dataPasien.jk} [${dataPasien.tglLahir}] ${dataPasien.umur}`,8);
 		$.AddText(0.1,0.85,`${dataPasien.desa} ${dataPasien.alamat}`,8);
 		$.AddRect(0.01,0.8,70,0.01);
 		$.AddText(0.1,0.65,obat.nama,11);
@@ -254,17 +258,18 @@ if($('#drug2PDF').length == 0 ){
 				obat.ket = obat.ket.join(' ')
 			}
 			$.AddText(0.2,0.52,obat.ket,8);
+			obat.ket3 = obat.ket3.trim()
 			if(obat.ket3.length){
 				$.AddText(0.2,0.43,obat.ket3,8);
 				jmlH = 0
 			} else {
-				jmlH = 0.1
+				jmlH = 0.12
 			}
 		}
-		$.AddText(0.1,0.25+jmlH,`Jml ${obat.jml}`,12);
-		$.AddText(0.1,0.08+jmlH,obat.dosis,14);
+		$.AddText(2.25,0.45,`[${obat.jml}]`,16);
+		$.AddText(0.1,0.2+jmlH,obat.dosis,12);
 		if(obat.ket2.length){
-			$.AddText(0.2,0+jmlH,obat.ket2,8);
+			$.AddText(0.2,0.1+jmlH-0.01,obat.ket2,8);
 		}
 
 		$.DrawPDF('obatframe');
