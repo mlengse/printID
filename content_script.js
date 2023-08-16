@@ -160,17 +160,21 @@ if($('#drug2PDF').length == 0 ){
 		let obat = Object.assign({}, obats[a.currentTarget.id.split('.')[0]])
 		console.log(obat)
 		obat.ket = ''
+		obat.ket2 = ''
 
-		while(obat.nama.length > 30){
-			obat.nama = obat.nama.split(' ')
+		while(obat.nama.length > 35){
+			obat.nama = obat.nama
+			.split('(').join(' ')
+			.split(')').join(' ')
+			.split(' ')
 			obat.ket = `${obat.nama.pop()} ${obat.ket}`
-			obat.nama = obat.nama.join(' ')
+			obat.nama = obat.nama.join(' ').trim()
 		}
 		
 		while(obat.dosis.length > 25){
 			obat.dosis = obat.dosis.split(' ')
-			obat.ket = `${obat.dosis.pop()} ${obat.ket}`
-			obat.dosis = obat.dosis.join(' ')
+			obat.ket2 = `${obat.dosis.pop()} ${obat.ket2}`
+			obat.dosis = obat.dosis.join(' ').trim()
 		}
 		let dataPasienArr = [...document.querySelector('#content > div.divkiri > fieldset.fd150 > div.divkiri').querySelectorAll('div')]
 
@@ -237,21 +241,26 @@ if($('#drug2PDF').length == 0 ){
 		$.AddText(0.1,0.85,`${dataPasien.desa} ${dataPasien.alamat}`,8);
 		$.AddRect(0.01,0.8,70,0.01);
 		$.AddText(0.1,0.65,obat.nama,11);
-		$.AddText(0.1,0.47,`Jml ${obat.jml}`,12);
-		$.AddText(0.1,0.3,obat.dosis,14);
-		console.log(obat.ket)
+		let jmlH = 0.25
 		if(obat.ket.length){
-			obat.ket2 = ''
+			obat.ket3 = ''
 			while(obat.ket.length > 40){
 				obat.ket = obat.ket.split(' ')
-				obat.ket2 = `${obat.ket.pop()} ${obat.ket2}`
+				obat.ket3 = `${obat.ket.pop()} ${obat.ket3}`
 				obat.ket = obat.ket.join(' ')
 			}
-			$.AddText(0.1,0.18,obat.ket,8);
-			if(obat.ket2.length){
-				$.AddText(0.1,0.08,obat.ket2,8);
+			$.AddText(0.2,0.52,obat.ket,8);
+			if(obat.ket3.length){
+				$.AddText(0.2,0.43,obat.ket3,8);
+				jmlH = 0
+			} else {
+				jmlH = 0.1
 			}
-	
+		}
+		$.AddText(0.1,0.25+jmlH,`Jml ${obat.jml}`,12);
+		$.AddText(0.1,0.1+jmlH,obat.dosis,14);
+		if(obat.ket2.length){
+			$.AddText(0.2,0+jmlH,obat.ket2,8);
 		}
 
 		$.DrawPDF('obatframe');
