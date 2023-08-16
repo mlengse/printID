@@ -10,7 +10,8 @@
     "tabs"
   ],
   "host_permissions": [
-    "http://192.168.100.178/j-care/*"
+    "http://192.168.100.178/j-care/*",
+    "http://10.12.10.114:800/j-care/*"
   ],
   "action": {
       "default_title": "Print ID",
