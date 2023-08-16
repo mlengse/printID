@@ -161,12 +161,16 @@ if($('#drug2PDF').length == 0 ){
 		console.log(obat)
 		obat.ket = ''
 		obat.ket2 = ''
+		obat.nama = obat.nama.replace(/[^a-zA-Z0-9]/g, " ")
+		// .split(',').join(' ')
+		// .split('.').join(' ')
+		// .split(':').join(' ')
+		// .split('(').join(' ')
+		// .split(')').join(' ')
+		// .split(' ')
 
 		while(obat.nama.length > 35){
-			obat.nama = obat.nama
-			.split('(').join(' ')
-			.split(')').join(' ')
-			.split(' ')
+			obat.nama = obat.nama.trim().split(' ')
 			obat.ket = `${obat.nama.pop()} ${obat.ket}`
 			obat.nama = obat.nama.join(' ').trim()
 		}
@@ -258,7 +262,7 @@ if($('#drug2PDF').length == 0 ){
 			}
 		}
 		$.AddText(0.1,0.25+jmlH,`Jml ${obat.jml}`,12);
-		$.AddText(0.1,0.1+jmlH,obat.dosis,14);
+		$.AddText(0.1,0.08+jmlH,obat.dosis,14);
 		if(obat.ket2.length){
 			$.AddText(0.2,0+jmlH,obat.ket2,8);
 		}
