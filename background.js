@@ -12,7 +12,10 @@ chrome.tabs.onUpdated.addListener(async function() {
 	let tab = await getCurrentTab();
 	// Listen for any changes to the URL of any tab.
 	// If the tabs url starts with 'http://192.168.1.99/j-care/visits/add_registrasi'...
-	if (tab.url && tab.url.includes('http://192.168.100.178/j-care/visits/')) {
+	if (tab.url && (
+		tab.url.includes('http://192.168.100.178/j-care/visits/')
+		|| tab.url.includes('http://10.12.10.114:800/j-care/visits/')
+	)) {
 
 		// Called when the user clicks on the page action.
 
