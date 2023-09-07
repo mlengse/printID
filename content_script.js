@@ -56,7 +56,7 @@ if($('#label2PDF').length == 0 ){
 
     let dataPasienArr = []
     let dataPasien = {}
-    let pasienTglLahir, nik, pasienUmur, noRM, pasienSex, pasienJK, alamat, jamKode, jaminan, pasien, pusk, pasienNama, pasienKK, svg;
+    let pasienTglLahir, nik, pasienUmur, noRM, pasienSex, pasienJK, alamat, jamKode, jaminan, pasien, pusk, pasienNama, pasienKK, svg, noA;
 
     if(!!document.querySelector('#content > div.divkiri > fieldset.fd150 > div.divkiri')){
       dataPasienArr = [...document.querySelector('#content > div.divkiri > fieldset.fd150 > div.divkiri').querySelectorAll('div')]
@@ -138,6 +138,7 @@ if($('#label2PDF').length == 0 ){
         svg = drawBarcode("svg", noRM, {
           type: 'Code 128'
         });
+        noA = noRM.substr(5,2);
         noRM = noRM.substr(0,6);
         pasienSex = $('#sex').val();
         pasienJK = $('#jk > option[value="' + pasienSex + '"]').text();
@@ -173,25 +174,26 @@ if($('#label2PDF').length == 0 ){
     // console.log(empt)
 
     if(empt){
-      $.CreateTemplate("inches",2.91339,1.29921,0.0787402,0.0787402,2.3622,1.1811,1,1,0.2,0.05);
+      $.CreateTemplate("inches",2.3622,1.5748,0.0787402,0.0787402,2.3622,1.5,1,1,0.2,0.05);
 
       // console.log(pasienNama)
   
       $(svg).find('rect').map(function(){ 
         let $x = $(this).attr('x');
         let strX = 0.2 + ($x*0.004481);
-        let strY = 0.85;
+        let strY = 1.05;
         let $width = $(this).attr('width');
         let strW = ($width*0.004481);
-        let strH = 0.45;
+        let strH = 0.35;
         $.AddRect(strX, strY, strW, strH);
       });
-      $.AddText(1.55,0.05,noRM,16);
-      $.AddText(0.2,0.7,pasienNama,10);
-      $.AddText(0.2,0.55,nik,10);
-      $.AddText(0.2,0.4,pasien,8);
-      $.AddText(0.2,0.25,alamat,8);
-      $.AddText(0.2,0.1,pusk,8);
+      $.AddText(0.2,0.12,noRM,14);
+      $.AddText(0.85,0.12,noA,10);
+      $.AddText(0.2,0.9,pasienNama,10);
+      $.AddText(0.2,0.75,nik,10);
+      $.AddText(0.2,0.6,pasien,10);
+      $.AddText(0.2,0.45,alamat,10);
+      $.AddText(0.2,0.3,pusk,10);
       $.DrawPDF('labelframe');
 
     }
@@ -301,6 +303,7 @@ if($('#drug2PDF').length == 0 ){
         desa: '',
         tglLahir: '',
         umur: dataPasienArr[14].querySelector('b').textContent.trim(),
+        bb: dataPasienArr[15].querySelector('b').textContent.trim(),
         jp: 'PKM Jayengan ' + dataPasienArr[12].querySelector('b').textContent.trim(),
       }
 
@@ -325,7 +328,7 @@ if($('#drug2PDF').length == 0 ){
 
 
 
-    while(dataPasien.nama.length > 30){
+    while(dataPasien.nama.length > 28){
       dataPasien.nama = dataPasien.nama.trim().split(' ')
       dataPasien.nama.pop()
       dataPasien.nama = dataPasien.nama.join(' ').trim()
@@ -376,7 +379,7 @@ if($('#drug2PDF').length == 0 ){
     $.AddText(wid + 0.05,1.7,`${tanggal}`,7);
     $.AddText(0.1,1.25,dataPasien.nama,10);
     $.AddText(0.1,1.13,`${dataPasien.jp}`,8);
-    $.AddText(0.1,1,`${dataPasien.jk} ${dataPasien.tglLahir.length ? `[${dataPasien.tglLahir}] ` : ''}${dataPasien.umur}`,8);
+    $.AddText(0.1,1,`${dataPasien.jk} ${dataPasien.tglLahir.length ? `[${dataPasien.tglLahir}] ` : ''}${dataPasien.umur}${dataPasien.bb ? ` ${dataPasien.bb}`: ''}`,8);
     $.AddText(0.1,0.85,`${dataPasien.desa ? `${dataPasien.desa} ` : ''}${dataPasien.alamat}`,8);
     $.AddRect(0.01,0.8,70,0.01);
     $.AddText(0.1,0.65,obat.nama,11);
