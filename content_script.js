@@ -79,6 +79,7 @@ if($('#label2PDF').length == 0 ){
         dataPasien.nama.pop()
         dataPasien.nama = dataPasien.nama.join(' ').trim()
       }
+
   
       if(!dataPasien.umur.length) {
         alert('mohon cek tgl lahir dan umur')
@@ -102,7 +103,7 @@ if($('#label2PDF').length == 0 ){
         type: 'Code 128'
       });
       dataPasien.rm = dataPasien.rm.substring(0,6);
-      console.log(dataPasien.rm)
+      // console.log(dataPasien.rm)
 
       pasienTglLahir = dataPasien.tglLahir
       nik = dataPasien.nik
@@ -288,6 +289,21 @@ if($('#drug2PDF').length == 0 ){
         jp: 'PKM Jayengan ' + dataPasienArr[10].querySelector('b').textContent.trim(),
       }
   
+    } else if(el === 'add_drug'){
+      dataPasien = {
+        rm: dataPasienArr[5].querySelector('b').textContent.trim().toUpperCase(),
+        nik: dataPasienArr[6].querySelector('b').textContent.trim(),
+        noKartu: dataPasienArr[7].querySelector('b').textContent.trim(),
+        nama: dataPasienArr[8].querySelector('b').textContent.trim(),
+        kk: dataPasienArr[9].querySelector('b').textContent.trim(),
+        alamat: dataPasienArr[10].querySelector('b').textContent.trim(),
+        jk: dataPasienArr[13].querySelector('b').textContent.trim(),
+        desa: '',
+        tglLahir: '',
+        umur: dataPasienArr[14].querySelector('b').textContent.trim(),
+        jp: 'PKM Jayengan ' + dataPasienArr[12].querySelector('b').textContent.trim(),
+      }
+
     } else {
       dataPasien = {
         rm: dataPasienArr[4].querySelector('b').textContent.trim().toUpperCase(),
@@ -304,6 +320,9 @@ if($('#drug2PDF').length == 0 ){
       }
 
     }
+
+    // console.log(el, dataPasien)
+
 
 
     while(dataPasien.nama.length > 30){
