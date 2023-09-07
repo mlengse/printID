@@ -102,12 +102,13 @@ if($('#label2PDF').length == 0 ){
       svg = drawBarcode("svg", dataPasien.rm, {
         type: 'Code 128'
       });
-      dataPasien.rm = dataPasien.rm.substring(0,6);
+      // dataPasien.rm = dataPasien.rm.substring(0,7);
       // console.log(dataPasien.rm)
 
       pasienTglLahir = dataPasien.tglLahir
       nik = dataPasien.nik
-      noRM = dataPasien.rm
+      noA = dataPasien.rm.substr(7,2)
+      noRM = dataPasien.rm.substring(0,7)
       // console.log(noRM)
       pasienJK = dataPasien.jk
       alamat = dataPasien.alamat
@@ -138,8 +139,8 @@ if($('#label2PDF').length == 0 ){
         svg = drawBarcode("svg", noRM, {
           type: 'Code 128'
         });
-        noA = noRM.substr(5,2);
-        noRM = noRM.substr(0,6);
+        noA = noRM.substr(7,2);
+        noRM = noRM.substr(0,7);
         pasienSex = $('#sex').val();
         pasienJK = $('#jk > option[value="' + pasienSex + '"]').text();
   
@@ -177,23 +178,32 @@ if($('#label2PDF').length == 0 ){
       $.CreateTemplate("inches",2.3622,1.5748,0.0787402,0.0787402,2.3622,1.5,1,1,0.2,0.05);
 
       // console.log(pasienNama)
-  
+      // let alamat = `${dataPasien.desa ? `${dataPasien.desa} ` : ''}${dataPasien.alamat}`
+      // if(alamat.length > 30){
+        // alamat = dataPasien.alamat
+      // }
+      while(alamat.length > 30){
+        alamat = alamat.trim().split(' ')
+        alamat.pop()
+        alamat = alamat.join(' ').trim()
+      }
+
       $(svg).find('rect').map(function(){ 
         let $x = $(this).attr('x');
-        let strX = 0.2 + ($x*0.004481);
+        let strX = 0 + ($x*0.004481);
         let strY = 1.05;
         let $width = $(this).attr('width');
         let strW = ($width*0.004481);
         let strH = 0.35;
         $.AddRect(strX, strY, strW, strH);
       });
-      $.AddText(0.2,0.12,noRM,14);
-      $.AddText(0.85,0.12,noA,10);
-      $.AddText(0.2,0.9,pasienNama,10);
-      $.AddText(0.2,0.75,nik,10);
-      $.AddText(0.2,0.6,pasien,10);
-      $.AddText(0.2,0.45,alamat,10);
-      $.AddText(0.2,0.3,pusk,10);
+      $.AddText(0.1,0.12,noRM,14);
+      $.AddText(0.87,0.12,noA,10);
+      $.AddText(0.1,0.9,pasienNama,10);
+      $.AddText(0.1,0.75,nik,10);
+      $.AddText(0.1,0.6,pasien,10);
+      $.AddText(0.1,0.45,alamat,8);
+      $.AddText(0.1,0.3,pusk,10);
       $.DrawPDF('labelframe');
 
     }
@@ -355,7 +365,7 @@ if($('#drug2PDF').length == 0 ){
     let svg = drawBarcode("svg", dataPasien.rm, {
       type: 'Code 128'
     });
-    dataPasien.rm = dataPasien.rm.substring(0,6);
+    dataPasien.rm = dataPasien.rm.substring(0,7);
 
     // console.log(dataPasien)
 
@@ -375,12 +385,21 @@ if($('#drug2PDF').length == 0 ){
         wid = strX
       }
     });
+    let alamat = `${dataPasien.desa ? `${dataPasien.desa} ` : ''}${dataPasien.alamat}`
+    if(alamat.length > 30){
+      alamat = dataPasien.alamat
+    }
+    while(alamat.length > 30){
+      alamat = alamat.trim().split(' ')
+      alamat.pop()
+      alamat = alamat.join(' ').trim()
+    }
     $.AddText(wid + 0.05,1.4,dataPasien.rm,16);
     $.AddText(wid + 0.05,1.7,`${tanggal}`,7);
     $.AddText(0.1,1.25,dataPasien.nama,10);
     $.AddText(0.1,1.13,`${dataPasien.jp}`,8);
     $.AddText(0.1,1,`${dataPasien.jk} ${dataPasien.tglLahir.length ? `[${dataPasien.tglLahir}] ` : ''}${dataPasien.umur}${dataPasien.bb ? ` ${dataPasien.bb}`: ''}`,8);
-    $.AddText(0.1,0.85,`${dataPasien.desa ? `${dataPasien.desa} ` : ''}${dataPasien.alamat}`,8);
+    $.AddText(0.1,0.85,`${alamat}`,8);
     $.AddRect(0.01,0.8,70,0.01);
     $.AddText(0.1,0.65,obat.nama,11);
     let jmlH = 0.25
