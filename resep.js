@@ -29,11 +29,22 @@ $('input[update="view_pemakaian_obat"]').on('click', async function(evt) {
         orgCol.style.textAlign = 'center'
         orgCol.style.verticalAlign = 'inherit'
       }
+      let ratCol = document.getElementById(`rat${i}`)
+      if(!ratCol){
+        ratCol = row.insertCell(5)
+        ratCol.setAttribute('id', `rat${i}`)
+        ratCol.setAttribute('width', '100')
+        ratCol.style.color = '#003399'
+        ratCol.style.textAlign = 'center'
+        ratCol.style.verticalAlign = 'inherit'
+      }
       if(!orgCol.textContent.length){
         let links = row.querySelectorAll('a')
         if(!links.length ){
           let text = document.createTextNode('Orang')
           orgCol.appendChild(text)
+          let textr = document.createTextNode('Rata2')
+          ratCol.appendChild(textr)
         } else {
           for(let link of links){
             // console.log(link.textContent);
@@ -48,6 +59,11 @@ $('input[update="view_pemakaian_obat"]').on('click', async function(evt) {
                   // console.log(rows.length)
                   let text = document.createTextNode(`${rows.length-1}`)
                   orgCol.appendChild(text)
+                  let jmls = row.querySelectorAll('td')
+                  let jml = Number(jmls[3].textContent.split('.').join(''))
+                  console.log(jml)
+                  let textr = document.createTextNode(`${Math.ceil(jml/(rows.length-1))}`)
+                  ratCol.appendChild(textr)
     
                 }
               })
