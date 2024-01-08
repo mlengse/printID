@@ -61,7 +61,7 @@ $('input[update="view_pemakaian_obat"]').on('click', async function(evt) {
                   orgCol.appendChild(text)
                   let jmls = row.querySelectorAll('td')
                   let jml = Number(jmls[3].textContent.split('.').join(''))
-                  console.log(jml)
+                  // console.log(jml)
                   let textr = document.createTextNode(`${Math.ceil(jml/(rows.length-1))}`)
                   ratCol.appendChild(textr)
     
