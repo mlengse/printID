@@ -78,7 +78,7 @@ $(document).ready(() => {
                     let text = document.createTextNode(`${rows.length-1}`)
                     orgCol.appendChild(text)
                     let jmls = row.querySelectorAll('td')
-                    let jml = Number(jmls[3].textContent.split('.').join(''))
+                    let jml = Number(jmls[6].textContent.split('.').join(''))
                     // console.log(jml)
                     let textr = document.createTextNode(`${Math.ceil(jml/(rows.length-1))}`)
                     ratCol.appendChild(textr)
