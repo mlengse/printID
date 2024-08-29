@@ -9,43 +9,48 @@ function waitForElm(elm) {
     }, 10); // check every 100ms
   })
 }
-
+window.sudah = false
 $(document).ready(() => {
   let submitId = document.querySelector('input[update="view_pemakaian_obat"]').getAttribute('id')
   // console.log(submitId)
+  // let timeStamp = 0
   $(`#${submitId}`).on('click', async function(evt) {
-    let ada = $('table.nested-table').length
-    if(ada){
-      console.log('loading')
-      // console.log('ada')
-      // await waitForElm('#loading[display="inline"]')
-      await waitForElm('#loading[style="margin: 0px 0px 10px 10px; display: none;"]')
-    }
-    await waitForElm('#view_pemakaian_obat')
-    let table = await waitForElm('table.nested-table')
-    if(table){
-      let rows = table.querySelectorAll('tr')
-      for (let i = 0; i < rows.length; i++) {
-        let row = rows[i]
-        let orgCol = document.getElementById(`org${i}`)
-        if(!orgCol){
-          orgCol = row.insertCell(4)
-          orgCol.setAttribute('id', `org${i}`)
-          orgCol.setAttribute('width', '100')
-          orgCol.style.color = '#003399'
-          orgCol.style.textAlign = 'center'
-          orgCol.style.verticalAlign = 'inherit'
-        }
-        let ratCol = document.getElementById(`rat${i}`)
-        if(!ratCol){
-          ratCol = row.insertCell(5)
-          ratCol.setAttribute('id', `rat${i}`)
-          ratCol.setAttribute('width', '100')
-          ratCol.style.color = '#003399'
-          ratCol.style.textAlign = 'center'
-          ratCol.style.verticalAlign = 'inherit'
-        }
-        // if(!orgCol.textContent.length){
+    if(!window.sudah){
+      // console.log(window.sudah)
+      window.sudah = true
+
+      let ada = $('table.nested-table').length
+      if(ada){
+        // console.log('loading')
+        // console.log('ada')
+        // await waitForElm('#loading[display="inline"]')
+        await waitForElm('#loading[style="margin: 0px 0px 10px 10px; display: none;"]')
+      }
+      await waitForElm('#view_pemakaian_obat')
+      let table = await waitForElm('table.nested-table')
+      if(table){
+        let rows = table.querySelectorAll('tr')
+        for (let i = 0; i < rows.length; i++) {
+          let row = rows[i]
+          let orgCol = document.getElementById(`org${i}`)
+          if(!orgCol){
+            orgCol = row.insertCell(4)
+            orgCol.setAttribute('id', `org${i}`)
+            orgCol.setAttribute('width', '100')
+            orgCol.style.color = '#003399'
+            orgCol.style.textAlign = 'center'
+            orgCol.style.verticalAlign = 'inherit'
+          }
+          let ratCol = document.getElementById(`rat${i}`)
+          if(!ratCol){
+            ratCol = row.insertCell(5)
+            ratCol.setAttribute('id', `rat${i}`)
+            ratCol.setAttribute('width', '100')
+            ratCol.style.color = '#003399'
+            ratCol.style.textAlign = 'center'
+            ratCol.style.verticalAlign = 'inherit'
+          }
+  
           let links = row.querySelectorAll('a')
           if(!links.length ){
             if(!orgCol.textContent.length){
@@ -55,10 +60,10 @@ $(document).ready(() => {
               ratCol.appendChild(textr)
             }
           } else {
-
-            console.log('table is ready');
-
-
+  
+            // console.log('table is ready');
+  
+  
             for(let link of links){
               // console.log(link.textContent);
               let href = link.getAttribute('href')
@@ -82,15 +87,18 @@ $(document).ready(() => {
                 })
               }
             }
+  
+            window.sudah = false
       
           }
     
-        // }
   
+        }
+    
       }
   
     }
-    
+
     return false;//Returning false prevents the event from continuing up the chain
   });
 })
