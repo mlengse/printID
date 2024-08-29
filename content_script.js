@@ -74,6 +74,8 @@ if($('#label2PDF').length == 0 ){
         jp: 'PKM Jayengan ' + dataPasienArr[10].querySelector('b').textContent.trim(),
       }
 
+      // console.log(dataPasien)
+
       while(dataPasien.nama.length > 30){
         dataPasien.nama = dataPasien.nama.trim().split(' ')
         dataPasien.nama.pop()
@@ -311,8 +313,8 @@ if($('#drug2PDF').length == 0 ){
         alamat: dataPasienArr[10].querySelector('b').textContent.trim(),
         jk: dataPasienArr[13].querySelector('b').textContent.trim(),
         desa: '',
-        tglLahir: '',
-        umur: dataPasienArr[14].querySelector('b').textContent.trim(),
+        tglLahir: dataPasienArr[14].querySelector('b').textContent.trim().split('/')[0],
+        umur: dataPasienArr[14].querySelector('b').textContent.trim().split('/')[1],
         bb: dataPasienArr[15].querySelector('b').textContent.trim(),
         jp: 'PKM Jayengan ' + dataPasienArr[12].querySelector('b').textContent.trim(),
       }
@@ -327,8 +329,8 @@ if($('#drug2PDF').length == 0 ){
         alamat: dataPasienArr[9].querySelector('b').textContent.trim(),
         jk: dataPasienArr[12].querySelector('b').textContent.trim(),
         desa: '',
-        tglLahir: '',
-        umur: dataPasienArr[13].querySelector('b').textContent.trim(),
+        tglLahir: dataPasienArr[13].querySelector('b').textContent.trim().split('/')[0],
+        umur: dataPasienArr[13].querySelector('b').textContent.trim().split('/')[1],
         jp: 'PKM Jayengan ' + dataPasienArr[11].querySelector('b').textContent.trim(),
       }
 
@@ -347,6 +349,7 @@ if($('#drug2PDF').length == 0 ){
     if(!dataPasien.umur.length) {
       alert('mohon cek tgl lahir dan umur')
     } else {
+      // console.log(dataPasien)
       let pasienThn = Number(dataPasien.umur.split('thn')[0].trim())
       let pasienBln = Number(dataPasien.umur.split('thn')[1].split('bln')[0].trim())
       let pasienHr = Number(dataPasien.umur.split('thn')[1].split('bln')[1].split('hr')[0].trim())
