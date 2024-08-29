@@ -110,132 +110,149 @@ if($('#label2PDF').length == 0 ){
       pasienEl = pasienEl + ' > div.divkiri'
     }
 
-    dataPasienArr = [...document.querySelector(pasienEl).querySelectorAll('div')]
+    let pasienElSelector = document.querySelector(pasienEl)
 
-    if(el === 'obat2'){
-      dataPasien = {
-        rm: dataPasienArr[0].querySelector('b').textContent.trim().toUpperCase(),
-        nik: dataPasienArr[1].querySelector('b').textContent.trim(),
-        noKartu: dataPasienArr[2].querySelector('b').textContent.trim(),
-        nama: dataPasienArr[3].querySelector('b').textContent.trim(),
-        kk: dataPasienArr[4].querySelector('b').textContent.trim(),
-        alamat: dataPasienArr[5].querySelector('b').textContent.trim(),
-        jk: dataPasienArr[6].querySelector('b').textContent.trim(),
-        desa: dataPasienArr[7].querySelector('b').textContent.trim(),
-        tglLahir: dataPasienArr[8].querySelector('b').textContent.trim(),
-        umur: dataPasienArr[9].querySelector('b').textContent.trim(),
-        jp: 'PKM Jayengan ' + dataPasienArr[10].querySelector('b').textContent.trim(),
-      }
-      pasienTglLahir = dataPasien.tglLahir
-      nik = dataPasien.nik
-      noA = dataPasien.rm.substr(7,2)
-      noRM = dataPasien.rm.substring(0,7)
-      // console.log(noRM)
-      pasienJK = dataPasien.jk
-      alamat = dataPasien.alamat
-      jaminan = dataPasien.jp
-      pasienUmur = dataPasien.umur
-      pasien = pasienJK + ", " + pasienTglLahir + ", " + pasienUmur;
-      pasienNama = dataPasien.nama
-      pasienKK = dataPasien.kk
-      pusk = dataPasien.jp
-      empt = true
+    if(pasienElSelector){
+      dataPasienArr = [...document.querySelector(pasienEl).querySelectorAll('div')]
+
+      if(el === 'obat2'){
+        dataPasien = {
+          rm: dataPasienArr[0].querySelector('b').textContent.trim().toUpperCase(),
+          nik: dataPasienArr[1].querySelector('b').textContent.trim(),
+          noKartu: dataPasienArr[2].querySelector('b').textContent.trim(),
+          nama: dataPasienArr[3].querySelector('b').textContent.trim(),
+          kk: dataPasienArr[4].querySelector('b').textContent.trim(),
+          alamat: dataPasienArr[5].querySelector('b').textContent.trim(),
+          jk: dataPasienArr[6].querySelector('b').textContent.trim(),
+          desa: dataPasienArr[7].querySelector('b').textContent.trim(),
+          tglLahir: dataPasienArr[8].querySelector('b').textContent.trim(),
+          umur: dataPasienArr[9].querySelector('b').textContent.trim(),
+          jp: 'PKM Jayengan ' + dataPasienArr[10].querySelector('b').textContent.trim(),
+        }
+        pasienTglLahir = dataPasien.tglLahir
+        nik = dataPasien.nik
+        noA = dataPasien.rm.substr(7,2)
+        noRM = dataPasien.rm.substring(0,7)
+        // console.log(noRM)
+        pasienJK = dataPasien.jk
+        alamat = dataPasien.alamat
+        jaminan = dataPasien.jp
+        pasienUmur = dataPasien.umur
+        pasien = pasienJK + ", " + pasienTglLahir + ", " + pasienUmur;
+        pasienNama = dataPasien.nama
+        pasienKK = dataPasien.kk
+        pusk = dataPasien.jp
+        empt = true
+    
+      } else if(el === 'add_drug'){
+        dataPasien = {
+          rm: dataPasienArr[5].querySelector('b').textContent.trim().toUpperCase(),
+          nik: dataPasienArr[6].querySelector('b').textContent.trim(),
+          noKartu: dataPasienArr[7].querySelector('b').textContent.trim(),
+          nama: dataPasienArr[8].querySelector('b').textContent.trim(),
+          kk: dataPasienArr[9].querySelector('b').textContent.trim(),
+          alamat: dataPasienArr[10].querySelector('b').textContent.trim(),
+          jk: dataPasienArr[13].querySelector('b').textContent.trim(),
+          desa: '',
+          tglLahir: dataPasienArr[14].querySelector('b').textContent.trim().split('/')[0],
+          umur: dataPasienArr[14].querySelector('b').textContent.trim().split('/')[1],
+          bb: dataPasienArr[15].querySelector('b').textContent.trim(),
+          jp: 'PKM Jayengan ' + dataPasienArr[12].querySelector('b').textContent.trim(),
+        }
+        pasienTglLahir = dataPasien.tglLahir
+        nik = dataPasien.nik
+        noA = dataPasien.rm.substr(7,2)
+        noRM = dataPasien.rm.substring(0,7)
+        // console.log(noRM)
+        pasienJK = dataPasien.jk
+        alamat = dataPasien.alamat
+        jaminan = dataPasien.jp
+        pasienUmur = dataPasien.umur
+        pasien = pasienJK + ", " + pasienTglLahir + ", " + pasienUmur;
+        pasienNama = dataPasien.nama
+        pasienKK = dataPasien.kk
+        pusk = dataPasien.jp
+        console.log(dataPasien)
+        empt = true
   
-    } else if(el === 'add_drug'){
-      dataPasien = {
-        rm: dataPasienArr[5].querySelector('b').textContent.trim().toUpperCase(),
-        nik: dataPasienArr[6].querySelector('b').textContent.trim(),
-        noKartu: dataPasienArr[7].querySelector('b').textContent.trim(),
-        nama: dataPasienArr[8].querySelector('b').textContent.trim(),
-        kk: dataPasienArr[9].querySelector('b').textContent.trim(),
-        alamat: dataPasienArr[10].querySelector('b').textContent.trim(),
-        jk: dataPasienArr[13].querySelector('b').textContent.trim(),
-        desa: '',
-        tglLahir: dataPasienArr[14].querySelector('b').textContent.trim().split('/')[0],
-        umur: dataPasienArr[14].querySelector('b').textContent.trim().split('/')[1],
-        bb: dataPasienArr[15].querySelector('b').textContent.trim(),
-        jp: 'PKM Jayengan ' + dataPasienArr[12].querySelector('b').textContent.trim(),
+      } else {
+        dataPasien = {
+          rm: dataPasienArr[4].querySelector('b').textContent.trim().toUpperCase(),
+          nik: dataPasienArr[5].querySelector('b').textContent.trim(),
+          noKartu: dataPasienArr[6].querySelector('b').textContent.trim(),
+          nama: dataPasienArr[7].querySelector('b').textContent.trim(),
+          kk: dataPasienArr[8].querySelector('b').textContent.trim(),
+          alamat: dataPasienArr[9].querySelector('b').textContent.trim(),
+          jk: dataPasienArr[12].querySelector('b').textContent.trim(),
+          desa: '',
+          tglLahir: dataPasienArr[13].querySelector('b').textContent.trim().split('/')[0],
+          umur: dataPasienArr[13].querySelector('b').textContent.trim().split('/')[1],
+          jp: 'PKM Jayengan ' + dataPasienArr[11].querySelector('b').textContent.trim(),
+        }
+        pasienTglLahir = dataPasien.tglLahir
+        nik = dataPasien.nik
+        noA = dataPasien.rm.substr(7,2)
+        noRM = dataPasien.rm.substring(0,7)
+        // console.log(noRM)
+        pasienJK = dataPasien.jk
+        alamat = dataPasien.alamat
+        jaminan = dataPasien.jp
+        pasienUmur = dataPasien.umur
+        pasien = pasienJK + ", " + pasienTglLahir + ", " + pasienUmur;
+        pasienNama = dataPasien.nama
+        pasienKK = dataPasien.kk
+        pusk = dataPasien.jp
+        console.log(dataPasien)
+        empt = true
+  
       }
-      pasienTglLahir = dataPasien.tglLahir
-      nik = dataPasien.nik
-      noA = dataPasien.rm.substr(7,2)
-      noRM = dataPasien.rm.substring(0,7)
-      // console.log(noRM)
-      pasienJK = dataPasien.jk
-      alamat = dataPasien.alamat
-      jaminan = dataPasien.jp
-      pasienUmur = dataPasien.umur
-      pasien = pasienJK + ", " + pasienTglLahir + ", " + pasienUmur;
-      pasienNama = dataPasien.nama
-      pasienKK = dataPasien.kk
-      pusk = dataPasien.jp
-      console.log(dataPasien)
-      empt = true
-
-    } else {
-      dataPasien = {
-        rm: dataPasienArr[4].querySelector('b').textContent.trim().toUpperCase(),
-        nik: dataPasienArr[5].querySelector('b').textContent.trim(),
-        noKartu: dataPasienArr[6].querySelector('b').textContent.trim(),
-        nama: dataPasienArr[7].querySelector('b').textContent.trim(),
-        kk: dataPasienArr[8].querySelector('b').textContent.trim(),
-        alamat: dataPasienArr[9].querySelector('b').textContent.trim(),
-        jk: dataPasienArr[12].querySelector('b').textContent.trim(),
-        desa: '',
-        tglLahir: dataPasienArr[13].querySelector('b').textContent.trim().split('/')[0],
-        umur: dataPasienArr[13].querySelector('b').textContent.trim().split('/')[1],
-        jp: 'PKM Jayengan ' + dataPasienArr[11].querySelector('b').textContent.trim(),
-      }
-      pasienTglLahir = dataPasien.tglLahir
-      nik = dataPasien.nik
-      noA = dataPasien.rm.substr(7,2)
-      noRM = dataPasien.rm.substring(0,7)
-      // console.log(noRM)
-      pasienJK = dataPasien.jk
-      alamat = dataPasien.alamat
-      jaminan = dataPasien.jp
-      pasienUmur = dataPasien.umur
-      pasien = pasienJK + ", " + pasienTglLahir + ", " + pasienUmur;
-      pasienNama = dataPasien.nama
-      pasienKK = dataPasien.kk
-      pusk = dataPasien.jp
-      console.log(dataPasien)
-      empt = true
-
+  
+  
     }
 
     // console.log(dataPasien)
 
-    while(pasienNama.length > 30){
+    while(pasienNama && pasienNama.length > 30){
       pasienNama = pasienNama.trim().split(' ')
       pasienNama.pop()
       pasienNama = pasienNama.join(' ').trim()
     }
 
 
-    if(!pasienUmur.length) {
+    if(pasienUmur && !pasienUmur.length) {
       alert('mohon cek tgl lahir dan umur')
     } else {
-      let pasienThn = Number(pasienUmur.split('thn')[0].trim())
-      let pasienBln = Number(pasienUmur.split('thn')[1].split('bln')[0].trim())
-      let pasienHr = Number(pasienUmur.split('thn')[1].split('bln')[1].split('hr')[0].trim())
-        
-      if (pasienThn > 0){
-        pasienUmur = pasienThn + " thn.";
-      } else if (pasienBln > 0){
-        pasienUmur = pasienBln + " bln.";
-      } else if (pasienHr > 0) {
-        pasienUmur = pasienHr + " hr.";
-      } else {
-        alert('usia tidak dapat dihitung')
+      if(pasienUmur){
+        let pasienThn = Number(pasienUmur.split('thn')[0].trim())
+        let pasienBln = Number(pasienUmur.split('thn')[1].split('bln')[0].trim())
+        let pasienHr = Number(pasienUmur.split('thn')[1].split('bln')[1].split('hr')[0].trim())
+          
+        if (pasienThn > 0){
+          pasienUmur = pasienThn + " thn.";
+        } else if (pasienBln > 0){
+          pasienUmur = pasienBln + " bln.";
+        } else if (pasienHr > 0) {
+          pasienUmur = pasienHr + " hr.";
+        } else {
+          alert('usia tidak dapat dihitung')
+        }
+  
       }
     }
 
-    pasien = pasienJK + ", " + pasienTglLahir + ", " + pasienUmur;
+    if(pasienUmur){
+      pasien = pasienJK + ", " + pasienTglLahir + ", " + pasienUmur;
 
-    svg = drawBarcode("svg", noRM, {
-      type: 'Code 128'
-    });
+    }
+
+    if(noRM){
+      svg = drawBarcode("svg", noRM, {
+        type: 'Code 128'
+      });
+  
+    }
+
+
 
 
     if($('#sex').length && $('#sex').val().length){
