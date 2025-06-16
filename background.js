@@ -6,77 +6,48 @@ async function getCurrentTab() {
   return tab;
 }
 
-// let runss = false
-// Called when the url of a tab changes.
+chrome.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
+  // Ensure the tab update is complete and the tab has a URL
+  if (changeInfo.status === 'complete' && tab.url) {
+    chrome.storage.local.get(['jcareUrl', 'puskesmasName'], function(settings) {
+      const storedJcareUrl = settings.jcareUrl;
+      const storedPuskesmasName = settings.puskesmasName || 'PKM Default'; // Default if not set
 
-// let injectedDrug = false
-// let injectedPrint = false
-chrome.tabs.onUpdated.addListener(async function() {
-  // console.log('updated')
-  let tab = await getCurrentTab();
-  // Listen for any changes to the URL of any tab.
-  // If the tabs url starts with 'http://192.168.1.99/j-care/visits/add_registrasi'...
-  if (tab.url ) {
-    if(
-      tab.url.includes('/j-care/visits')
-      // && !injectedPrint
-    ) {
-
-      // injectedPrint = true
-
-      // chrome.storage.local.get(['injectedPrint'], async function (result) {
-      //   console.log(result.injectedPrint)
-      //   if(!result.injectedPrint){
-      //     chrome.storage.local.set({injectedPrint: true})
-          chrome.scripting.executeScript({
-            target: {
-              tabId: tab.id
-            },
-            files: [ 
-              "jquery-1.11.3.js", 
-              "bardcode.min.js", 
-              "base64.min.js" ,
-              "sprintf.min.js",
-              "jsLabel2PDF.js",
-              "content_script.js",
+      if (storedJcareUrl && tab.url.startsWith(storedJcareUrl)) {
+        // Set the Puskesmas name as a global variable for content scripts
+        // This is a workaround because direct modification of content_script.js is failing
+        chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          func: (name) => { window.EXTENSION_PUSKESMAS_NAME = name; },
+          args: [storedPuskesmasName]
+        }).then(() => {
+          // Now check for specific paths for different scripts
+          if (tab.url.includes('/visits')) { // Assuming '/visits' is part of the path for patient labels
+            chrome.scripting.executeScript({
+              target: { tabId: tab.id },
+              files: [
+                "jquery-3.7.1.min.js",
+                "jquery-migrate.min.js",
+                "bardcode.min.js",
+                "base64.min.js" ,
+                "sprintf.min.js",
+                "jsLabel2PDF.js",
+                "content_script.js"
               ]
-          });
-  
-      //   }
-      // })
-
-    } else if(
-      tab.url.includes('j-care/healthcenters/rekap_pemakaian_obat')
-      // && !injectedDrug
-    ) {
-
-      // injectedDrug = true
-
-      // const scripts = await chrome.scripting.getRegisteredContentScripts();
-      // const scriptIds = scripts.map(script => script.id);
-      // console.log(scriptIds)
-
-
-      // chrome.storage.local.get(['injectedDrug'], async function (result) {
-      //   console.log(result.injectedDrug)
-      //   // if(!result.injectedDrug){
-  
-      //     chrome.storage.local.set({injectedDrug: true})
-          chrome.scripting.executeScript({
-            target: {
-              tabId: tab.id
-            },
-            files: [ 
-              "jquery-1.11.3.js", 
-              'resep.js'
-            ]
-          });
-        // }
-    //   })
-  
-    }
-
+            });
+          } else if (tab.url.includes('/healthcenters/rekap_pemakaian_obat')) { // Assuming this path for drug labels
+            chrome.scripting.executeScript({
+              target: { tabId: tab.id },
+              files: [
+                "jquery-3.7.1.min.js",
+                // jQuery Migrate might also be useful here if resep.js has compatibility needs
+                // "jquery-migrate.min.js",
+                'resep.js'
+              ]
+            });
+          }
+        }).catch(err => console.error('Failed to set global variable or execute scripts:', err));
+      }
+    });
   }
 });
-
-
