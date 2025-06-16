@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pengaturan Ekstensi Print ID</title>
+  <style>
+    body { font-family: sans-serif; padding: 10px; }
+    label { display: block; margin-top: 10px; }
+    input[type='text'] { width: 300px; padding: 5px; }
+    button { margin-top: 15px; padding: 8px 15px; }
+    .status { margin-top: 10px; color: green; }
+  </style>
+</head>
+<body>
+  <h1>Pengaturan Ekstensi Print ID</h1>
+
+  <label for="jcareUrl">URL j-care:</label>
+  <input type="text" id="jcareUrl" name="jcareUrl" placeholder="Contoh: http://192.168.100.178/j-care/">
+
+  <label for="puskesmasName">Nama Puskesmas:</label>
+  <input type="text" id="puskesmasName" name="puskesmasName" placeholder="Contoh: PKM Jayengan">
+
+  <button id="save">Simpan</button>
+  <div id="status" class="status"></div>
+
+  <script src="options.js"></script>
+</body>
+</html>
