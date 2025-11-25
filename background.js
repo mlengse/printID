@@ -11,6 +11,7 @@ chrome.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
           chrome.scripting.executeScript({
             target: { tabId: tab.id },
             files: [
+              "domHelpers.js",
               "jquery-3.7.1.min.js",
               "jquery-migrate.min.js",
               "bardcode.min.js",
@@ -30,6 +31,7 @@ chrome.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
           chrome.scripting.executeScript({
             target: { tabId: tab.id },
             files: [
+              "domHelpers.js",
               "jquery-3.7.1.min.js",
               'resep.js'
             ]
@@ -37,7 +39,7 @@ chrome.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
         } else if (tab.url.includes('/j-care/bpjs/apis/detail/')) { // Path for BPJS detail page with screening check
           chrome.scripting.executeScript({
             target: { tabId: tab.id },
-            files: ['bpjs_skrining.js']
+            files: ['domHelpers.js', 'bpjs_skrining.js']
           }).catch(err => console.error('Failed to execute BPJS skrining script:', err));
         }
       }
@@ -47,7 +49,7 @@ chrome.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
     if (tab.url && (tab.url.startsWith('https://webskrining.bpjs-kesehatan.go.id/skrining') || tab.url.includes('webskrining.bpjs-kesehatan.go.id'))) {
       chrome.scripting.executeScript({
         target: { tabId: tab.id },
-        files: ['bpjs_skrining_autofill.js']
+        files: ['domHelpers.js', 'bpjs_skrining_autofill.js']
       // }).then(() => {
         // console.log('BPJS skrining autofill script injected successfully');
       }).catch(err => console.error('Failed to execute BPJS skrining autofill script:', err));
