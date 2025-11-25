@@ -86,7 +86,7 @@ if ($('#label2PDF').length === 0) {
         desa: dataPasienArr[7].querySelector('b').textContent.trim(),
         tglLahir: dataPasienArr[8].querySelector('b').textContent.trim(),
         umur: dataPasienArr[9].querySelector('b').textContent.trim(),
-        jp: 'PKM Jayengan ' + dataPasienArr[10].querySelector('b').textContent.trim(),
+        jp: puskesmasName + ' ' + dataPasienArr[10].querySelector('b').textContent.trim(),
       }
 
       pasienTglLahir = dataPasien.tglLahir
@@ -126,7 +126,7 @@ if ($('#label2PDF').length === 0) {
           desa: dataPasienArr[7].querySelector('b').textContent.trim(),
           tglLahir: dataPasienArr[8].querySelector('b').textContent.trim(),
           umur: dataPasienArr[9].querySelector('b').textContent.trim(),
-          jp: 'PKM Jayengan ' + dataPasienArr[10].querySelector('b').textContent.trim(),
+          jp: puskesmasName + ' ' + dataPasienArr[10].querySelector('b').textContent.trim(),
         }
         pasienTglLahir = dataPasien.tglLahir
         nik = dataPasien.nik
@@ -155,7 +155,7 @@ if ($('#label2PDF').length === 0) {
           tglLahir: dataPasienArr[14].querySelector('b').textContent.trim().split('/')[0],
           umur: dataPasienArr[14].querySelector('b').textContent.trim().split('/')[1],
           bb: dataPasienArr[15].querySelector('b').textContent.trim(),
-          jp: 'PKM Jayengan ' + dataPasienArr[12].querySelector('b').textContent.trim(),
+          jp: puskesmasName + ' ' + dataPasienArr[12].querySelector('b').textContent.trim(),
         }
         pasienTglLahir = dataPasien.tglLahir
         nik = dataPasien.nik
@@ -183,7 +183,7 @@ if ($('#label2PDF').length === 0) {
           desa: '',
           tglLahir: dataPasienArr[13].querySelector('b').textContent.trim().split('/')[0],
           umur: dataPasienArr[13].querySelector('b').textContent.trim().split('/')[1],
-          jp: 'PKM Jayengan ' + dataPasienArr[11].querySelector('b').textContent.trim(),
+          jp: puskesmasName + ' ' + dataPasienArr[11].querySelector('b').textContent.trim(),
         }
         pasienTglLahir = dataPasien.tglLahir
         nik = dataPasien.nik
@@ -415,7 +415,7 @@ if ($('#drug2PDF').length === 0) {
         desa: dataPasienArr[7].querySelector('b').textContent.trim(),
         tglLahir: dataPasienArr[8].querySelector('b').textContent.trim(),
         umur: dataPasienArr[9].querySelector('b').textContent.trim(),
-        jp: 'PKM Jayengan ' + dataPasienArr[10].querySelector('b').textContent.trim(),
+        jp: puskesmasName + ' ' + dataPasienArr[10].querySelector('b').textContent.trim(),
       }
 
     } else if (el === 'add_drug') {
@@ -431,7 +431,7 @@ if ($('#drug2PDF').length === 0) {
         tglLahir: dataPasienArr[14].querySelector('b').textContent.trim().split('/')[0],
         umur: dataPasienArr[14].querySelector('b').textContent.trim().split('/')[1],
         bb: dataPasienArr[15].querySelector('b').textContent.trim(),
-        jp: 'PKM Jayengan ' + dataPasienArr[12].querySelector('b').textContent.trim(),
+        jp: puskesmasName + ' ' + dataPasienArr[12].querySelector('b').textContent.trim(),
       }
 
       // tanggal = dataPasienArr[0].querySelector('b').textContent.trim()
@@ -448,7 +448,7 @@ if ($('#drug2PDF').length === 0) {
         desa: '',
         tglLahir: dataPasienArr[13].querySelector('b').textContent.trim().split('/')[0],
         umur: dataPasienArr[13].querySelector('b').textContent.trim().split('/')[1],
-        jp: 'PKM Jayengan ' + dataPasienArr[11].querySelector('b').textContent.trim(),
+        jp: puskesmasName + ' ' + dataPasienArr[11].querySelector('b').textContent.trim(),
       }
 
     }
