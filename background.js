@@ -34,8 +34,23 @@ chrome.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
               'resep.js'
             ]
           }).catch(err => console.error('Failed to execute scripts:', err));
+        } else if (tab.url.includes('/j-care/bpjs/apis/detail/')) { // Path for BPJS detail page with screening check
+          chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            files: ['bpjs_skrining.js']
+          }).catch(err => console.error('Failed to execute BPJS skrining script:', err));
         }
       }
     });
+    
+    // Inject autofill script to BPJS skrining website
+    if (tab.url && (tab.url.startsWith('https://webskrining.bpjs-kesehatan.go.id/skrining') || tab.url.includes('webskrining.bpjs-kesehatan.go.id'))) {
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ['bpjs_skrining_autofill.js']
+      }).then(() => {
+        console.log('BPJS skrining autofill script injected successfully');
+      }).catch(err => console.error('Failed to execute BPJS skrining autofill script:', err));
+    }
   }
 });
