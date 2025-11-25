@@ -11,7 +11,12 @@ function waitForElm(elm) {
 }
 window.sudah = false
 $(document).ready(() => {
-  const submitId = document.querySelector('input[update="view_pemakaian_obat"]').getAttribute('id');
+  const submitBtn = safeQuerySelector('input[update="view_pemakaian_obat"]');
+  if (!submitBtn) {
+    console.warn('[resep.js] Submit button not found, medication statistics unavailable');
+    return;
+  }
+  const submitId = submitBtn.getAttribute('id');
   // console.log(submitId)
   // let timeStamp = 0
   $(`#${submitId}`).on('click', async function(_evt) {
