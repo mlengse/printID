@@ -18,7 +18,13 @@
     "jQuery": "readonly",
     "drawBarcode": "readonly",
     "Base64": "readonly",
-    "sprintf": "readonly"
+    "sprintf": "readonly",
+    "safeQuerySelector": "readonly",
+    "safeQuerySelectorAll": "readonly",
+    "safeText": "readonly",
+    "safeAttr": "readonly",
+    "safeGetById": "readonly",
+    "waitForElement": "readonly"
   },
   "rules": {
     "no-console": ["warn", { "allow": ["warn", "error"] }],
@@ -27,6 +33,21 @@
     "no-var": "warn",
     "prefer-const": "warn",
     "no-undef": "error",
-    "no-inner-declarations": "off"
+    "no-inner-declarations": "off",
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "CallExpression[callee.object.name='document'][callee.property.name='querySelector']",
+        "message": "Use safeQuerySelector() instead of document.querySelector() for better error handling."
+      },
+      {
+        "selector": "CallExpression[callee.object.name='document'][callee.property.name='querySelectorAll']",
+        "message": "Use safeQuerySelectorAll() instead of document.querySelectorAll() for better error handling."
+      },
+      {
+        "selector": "CallExpression[callee.object.name='document'][callee.property.name='getElementById']",
+        "message": "Use safeGetById() instead of document.getElementById() for better error handling."
+      }
+    ]
   }
 }
