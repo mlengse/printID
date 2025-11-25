@@ -16,10 +16,9 @@
   let catalogNumber = 0;
   let xobjectNumbersArry = new Array();
 
-  let _units = "inches";
-  let _numRows = 7;
-  let _numColumns = 3;
-
+  const _units = "inches";
+  const _numRows = 7;
+  const _numColumns = 3;
 
   let _paperWidthPt = 0;
   let _paperHeightPt = 0;
@@ -41,17 +40,6 @@
   let _rectCounter = 0;
 
   $.CreateTemplate = function (units, paperWidth, paperHeight, marginLeft, marginTop, labelWidth, labelHeight, numRows, numColumns, horizontalSpace, verticalSpace) {
-    _units = units;
-    _paperWidth = paperWidth;
-    _paperHeight = paperHeight;
-    _marginLeft = marginLeft;
-    _marginTop = marginTop;
-    _labelWidth = labelWidth;
-    _labelHeight = labelHeight;
-    _numRows = numRows;
-    _numColumns = numColumns;
-    _horizontalSpace = horizontalSpace;
-    _verticalSpace = verticalSpace;
 
     if (_units === "inches") {
       _paperWidthPt = paperWidth * (72);

@@ -12,16 +12,6 @@ if ($('#label2PDF').length === 0) {
     }
   });
 
-  // Helper functions for safer DOM access
-  function safeQuerySelector(selector, root = document) {
-    try {
-      return root.querySelector(selector);
-    } catch (e) {
-      console.warn('Invalid selector:', selector, e);
-      return null;
-    }
-  }
-
   if ($('#obat2').length) {
     el = 'obat2'
   } else if ($('#add_drug').length) {
@@ -81,7 +71,7 @@ if ($('#label2PDF').length === 0) {
 
     let dataPasienArr = []
     let dataPasien = {}
-    let pasienTglLahir, nik, pasienUmur, noRM, pasienSex, pasienJK, alamat, jamKode, jaminan, pasien, pusk, pasienNama, pasienKK, svg, noA;
+    let pasienTglLahir, nik, pasienUmur, noRM, pasienSex, pasienJK, alamat, jamKode, jaminan, pasien, pusk, pasienNama, svg, noA;
 
     if (document.querySelector('#content > div.divkiri > fieldset.fd150 > div.divkiri')) {
       dataPasienArr = [...document.querySelector('#content > div.divkiri > fieldset.fd150 > div.divkiri').querySelectorAll('div')]
@@ -109,7 +99,6 @@ if ($('#label2PDF').length === 0) {
       pasienUmur = dataPasien.umur
       pasien = pasienJK + ", " + pasienTglLahir + ", " + pasienUmur;
       pasienNama = dataPasien.nama
-      pasienKK = dataPasien.kk
       pusk = dataPasien.jp
       empt = true
 
@@ -150,7 +139,6 @@ if ($('#label2PDF').length === 0) {
         pasienUmur = dataPasien.umur
         pasien = pasienJK + ", " + pasienTglLahir + ", " + pasienUmur;
         pasienNama = dataPasien.nama
-        pasienKK = dataPasien.kk
         pusk = dataPasien.jp
         empt = true
 
@@ -180,9 +168,7 @@ if ($('#label2PDF').length === 0) {
         pasienUmur = dataPasien.umur
         pasien = pasienJK + ", " + pasienTglLahir + ", " + pasienUmur;
         pasienNama = dataPasien.nama
-        pasienKK = dataPasien.kk
         pusk = dataPasien.jp
-        console.log(dataPasien)
         empt = true
 
       } else {
@@ -203,15 +189,14 @@ if ($('#label2PDF').length === 0) {
         nik = dataPasien.nik
         noA = dataPasien.rm.substr(7, 2)
         noRM = dataPasien.rm.substring(0, 7)
-        // console.log(noRM)
         pasienJK = dataPasien.jk
         alamat = dataPasien.alamat
         jaminan = dataPasien.jp
         pasienUmur = dataPasien.umur
         pasien = pasienJK + ", " + pasienTglLahir + ", " + pasienUmur;
         pasienNama = dataPasien.nama
-        pasienKK = dataPasien.kk
         pusk = dataPasien.jp
+        // eslint-disable-next-line no-console
         console.log(dataPasien)
         empt = true
 
@@ -296,11 +281,9 @@ if ($('#label2PDF').length === 0) {
 
       if ($('#VisitNama').length) {
         pasienNama = $('#VisitNama').val();
-        pasienKK = $('#VisitNamaKk').val();
 
       } else {
         pasienNama = $('#namapasien').val();
-        pasienKK = $('#nama_kk').val();
       }
 
       empt = true
