@@ -48,7 +48,34 @@ Setelah ekstensi dikonfigurasi dengan benar:
 
 ## Catatan Penting
 *   Pastikan URL j-care yang Anda masukkan di halaman opsi adalah benar dan lengkap agar ekstensi dapat berfungsi. Perhatikan contoh format yang diberikan.
-*   Untuk label identitas pasien, nama Puskesmas yang tercetak akan sesuai dengan yang Anda masukkan di halaman opsi. Jika Anda mengalami masalah dimana nama Puskesmas kembali ke nama default ("PKM Default" atau "PKM Jayengan" jika ada masalah pada script), coba simpan ulang pengaturan di halaman Opsi dan segarkan halaman j-care.
+*   Untuk label identitas pasien, nama Puskesmas yang tercetak akan sesuai dengan yang Anda masukkan di halaman opsi. Jika Anda mengalami masalah dimana nama Puskesmas kembali ke nama default ("PKM Default"), coba simpan ulang pengaturan di halaman Opsi dan segarkan halaman j-care.
+
+## Keamanan & Best Practices
+
+### Host Permissions
+Ekstensi ini saat ini meminta izin untuk mengakses semua website (`http://*/*` dan `https://*/*`). Untuk keamanan yang lebih baik:
+
+1. **Untuk Pengguna:** Pastikan Anda hanya menggunakan ekstensi ini di sistem j-care internal yang terpercaya.
+2. **Untuk Developer:** Sebaiknya ubah `host_permissions` di `manifest.json` untuk hanya mencakup URL spesifik sistem j-care Anda. Contoh:
+   ```json
+   "host_permissions": [
+     "http://192.168.100.178/*",
+     "http://localhost:3000/*"
+   ]
+   ```
+
+### Development
+Proyek ini sudah dilengkapi dengan tooling modern:
+- **ESLint** untuk static code analysis
+- **Prettier** untuk code formatting
+
+Untuk menggunakan:
+```bash
+npm install
+npm run lint        # Check for code issues
+npm run lint:fix    # Auto-fix code issues
+npm run format      # Format all files
+```
 
 ## Lisensi
 
