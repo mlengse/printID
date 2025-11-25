@@ -6,7 +6,7 @@
   // Fungsi untuk mendapatkan nomor BPJS dari halaman
   function getNoBPJS() {
     // Metode 1: Cari langsung dengan class nokartu
-    const nokartuSpan = document.querySelector('span.nokartu');
+    const nokartuSpan = safeQuerySelector('span.nokartu');
     if (nokartuSpan) {
       const noBPJS = nokartuSpan.textContent.trim().replace(/\s/g, '').replace(/&nbsp;/g, '');
       if (noBPJS) {
@@ -16,13 +16,13 @@
     }
     
     // Metode 2: Cari di input-static yang labelnya "No. Kartu" atau "No Kartu"
-    const inputStatics = document.querySelectorAll('.input-static');
+    const inputStatics = safeQuerySelectorAll('.input-static');
     for (const inputStatic of inputStatics) {
-      const label = inputStatic.querySelector('label');
+      const label = safeQuerySelector('label', inputStatic);
       if (label) {
         const labelText = label.textContent.trim();
         if (labelText === 'No. Kartu' || labelText === 'No Kartu') {
-          const span = inputStatic.querySelector('span');
+          const span = safeQuerySelector('span', inputStatic);
           if (span) {
             const noBPJS = span.textContent.trim().replace(/\s/g, '').replace(/&nbsp;/g, '');
             if (noBPJS) {
@@ -35,7 +35,7 @@
     }
     
     console.error('Nomor BPJS tidak ditemukan dengan semua metode');
-    // console.log('Mencari span.nokartu:', document.querySelector('span.nokartu'));
+    // console.log('Mencari span.nokartu:', safeQuerySelector('span.nokartu'));
     return null;
   }
 
@@ -95,7 +95,7 @@
 
   // Fungsi untuk memeriksa apakah element mengandung pesan skrining
   function checkForSkriningMessage() {
-    const detailContainer = document.querySelector('.detail-container');
+    const detailContainer = safeQuerySelector('.detail-container');
     
     if (!detailContainer) {
       return false;
@@ -110,7 +110,7 @@
   // Fungsi untuk membuat loading indicator
   function createLoadingIndicator() {
     // Cek apakah sudah ada loading indicator
-    let existingLoader = document.getElementById('bpjs-skrining-loader');
+    let existingLoader = safeGetById('bpjs-skrining-loader');
     if (existingLoader) {
       return existingLoader;
     }
@@ -174,7 +174,7 @@
 
   // Fungsi untuk update text loading indicator
   function updateLoadingText(text) {
-    const loaderText = document.getElementById('bpjs-skrining-loader-text');
+    const loaderText = safeGetById('bpjs-skrining-loader-text');
     if (loaderText) {
       loaderText.textContent = text;
     }
@@ -182,7 +182,7 @@
 
   // Fungsi untuk menghapus loading indicator
   function removeLoadingIndicator() {
-    const loader = document.getElementById('bpjs-skrining-loader');
+    const loader = safeGetById('bpjs-skrining-loader');
     if (loader) {
       loader.remove();
     }
@@ -281,8 +281,9 @@
   // Data akan diambil dari sessionStorage di window skrining
   function fillSkriningForm(targetWindow, data) {
     try {
-      const nikInput = targetWindow.document.querySelector('#nik_txt');
-      const tglLahirInput = targetWindow.document.querySelector('#TglLahir_src');
+      const targetDoc = targetWindow.document;
+      const nikInput = safeQuerySelector('#nik_txt', targetDoc);
+      const tglLahirInput = safeQuerySelector('#TglLahir_src', targetDoc);
       
       if (nikInput && data.noKTP) {
         nikInput.value = data.noKTP;
