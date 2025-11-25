@@ -5,6 +5,13 @@ if ($('#label2PDF').length === 0) {
   let el;
   let puskesmasName = 'PKM Default'; // Default fallback
 
+  // Helper function to safely extract text from array element
+  function safeArrayText(arr, index, selector = 'b') {
+    if (!arr || !arr[index]) return '';
+    const elem = arr[index].querySelector(selector);
+    return elem ? elem.textContent.trim() : '';
+  }
+
   // Listen for puskesmas name from background script
   chrome.runtime.onMessage.addListener((message) => {
     if (message?.type === 'SET_PUSKESMAS_NAME') {
@@ -73,20 +80,21 @@ if ($('#label2PDF').length === 0) {
     let dataPasien = {}
     let pasienTglLahir, nik, pasienUmur, noRM, pasienSex, pasienJK, alamat, jamKode, jaminan, pasien, pusk, pasienNama, svg, noA;
 
-    if (document.querySelector('#content > div.divkiri > fieldset.fd150 > div.divkiri')) {
-      dataPasienArr = [...document.querySelector('#content > div.divkiri > fieldset.fd150 > div.divkiri').querySelectorAll('div')]
+    const pasienContainer = safeQuerySelector('#content > div.divkiri > fieldset.fd150 > div.divkiri');
+    if (pasienContainer) {
+      dataPasienArr = safeQuerySelectorAll('div', pasienContainer);
       dataPasien = {
-        rm: dataPasienArr[0].querySelector('b').textContent.trim().toUpperCase(),
-        nik: dataPasienArr[1].querySelector('b').textContent.trim(),
-        noKartu: dataPasienArr[2].querySelector('b').textContent.trim(),
-        nama: dataPasienArr[3].querySelector('b').textContent.trim(),
-        kk: dataPasienArr[4].querySelector('b').textContent.trim(),
-        alamat: dataPasienArr[5].querySelector('b').textContent.trim(),
-        jk: dataPasienArr[6].querySelector('b').textContent.trim(),
-        desa: dataPasienArr[7].querySelector('b').textContent.trim(),
-        tglLahir: dataPasienArr[8].querySelector('b').textContent.trim(),
-        umur: dataPasienArr[9].querySelector('b').textContent.trim(),
-        jp: puskesmasName + ' ' + dataPasienArr[10].querySelector('b').textContent.trim(),
+        rm: safeArrayText(dataPasienArr, 0).toUpperCase(),
+        nik: safeArrayText(dataPasienArr, 1),
+        noKartu: safeArrayText(dataPasienArr, 2),
+        nama: safeArrayText(dataPasienArr, 3),
+        kk: safeArrayText(dataPasienArr, 4),
+        alamat: safeArrayText(dataPasienArr, 5),
+        jk: safeArrayText(dataPasienArr, 6),
+        desa: safeArrayText(dataPasienArr, 7),
+        tglLahir: safeArrayText(dataPasienArr, 8),
+        umur: safeArrayText(dataPasienArr, 9),
+        jp: puskesmasName + ' ' + safeArrayText(dataPasienArr, 10),
       }
 
       pasienTglLahir = dataPasien.tglLahir
@@ -109,24 +117,24 @@ if ($('#label2PDF').length === 0) {
       pasienEl = pasienEl + ' > div.divkiri'
     }
 
-    const pasienElSelector = document.querySelector(pasienEl)
+    const pasienElSelector = safeQuerySelector(pasienEl);
 
     if (pasienElSelector) {
-      dataPasienArr = [...document.querySelector(pasienEl).querySelectorAll('div')]
+      dataPasienArr = safeQuerySelectorAll('div', pasienElSelector);
 
       if (el === 'obat2') {
         dataPasien = {
-          rm: dataPasienArr[0].querySelector('b').textContent.trim().toUpperCase(),
-          nik: dataPasienArr[1].querySelector('b').textContent.trim(),
-          noKartu: dataPasienArr[2].querySelector('b').textContent.trim(),
-          nama: dataPasienArr[3].querySelector('b').textContent.trim(),
-          kk: dataPasienArr[4].querySelector('b').textContent.trim(),
-          alamat: dataPasienArr[5].querySelector('b').textContent.trim(),
-          jk: dataPasienArr[6].querySelector('b').textContent.trim(),
-          desa: dataPasienArr[7].querySelector('b').textContent.trim(),
-          tglLahir: dataPasienArr[8].querySelector('b').textContent.trim(),
-          umur: dataPasienArr[9].querySelector('b').textContent.trim(),
-          jp: puskesmasName + ' ' + dataPasienArr[10].querySelector('b').textContent.trim(),
+          rm: safeArrayText(dataPasienArr, 0).toUpperCase(),
+          nik: safeArrayText(dataPasienArr, 1),
+          noKartu: safeArrayText(dataPasienArr, 2),
+          nama: safeArrayText(dataPasienArr, 3),
+          kk: safeArrayText(dataPasienArr, 4),
+          alamat: safeArrayText(dataPasienArr, 5),
+          jk: safeArrayText(dataPasienArr, 6),
+          desa: safeArrayText(dataPasienArr, 7),
+          tglLahir: safeArrayText(dataPasienArr, 8),
+          umur: safeArrayText(dataPasienArr, 9),
+          jp: puskesmasName + ' ' + safeArrayText(dataPasienArr, 10),
         }
         pasienTglLahir = dataPasien.tglLahir
         nik = dataPasien.nik
@@ -143,19 +151,20 @@ if ($('#label2PDF').length === 0) {
         empt = true
 
       } else if (el === 'add_drug') {
+        const tglLahirRaw = safeArrayText(dataPasienArr, 14).split('/');
         dataPasien = {
-          rm: dataPasienArr[5].querySelector('b').textContent.trim().toUpperCase(),
-          nik: dataPasienArr[6].querySelector('b').textContent.trim(),
-          noKartu: dataPasienArr[7].querySelector('b').textContent.trim(),
-          nama: dataPasienArr[8].querySelector('b').textContent.trim(),
-          kk: dataPasienArr[9].querySelector('b').textContent.trim(),
-          alamat: dataPasienArr[10].querySelector('b').textContent.trim(),
-          jk: dataPasienArr[13].querySelector('b').textContent.trim(),
+          rm: safeArrayText(dataPasienArr, 5).toUpperCase(),
+          nik: safeArrayText(dataPasienArr, 6),
+          noKartu: safeArrayText(dataPasienArr, 7),
+          nama: safeArrayText(dataPasienArr, 8),
+          kk: safeArrayText(dataPasienArr, 9),
+          alamat: safeArrayText(dataPasienArr, 10),
+          jk: safeArrayText(dataPasienArr, 13),
           desa: '',
-          tglLahir: dataPasienArr[14].querySelector('b').textContent.trim().split('/')[0],
-          umur: dataPasienArr[14].querySelector('b').textContent.trim().split('/')[1],
-          bb: dataPasienArr[15].querySelector('b').textContent.trim(),
-          jp: puskesmasName + ' ' + dataPasienArr[12].querySelector('b').textContent.trim(),
+          tglLahir: tglLahirRaw[0] || '',
+          umur: tglLahirRaw[1] || '',
+          bb: safeArrayText(dataPasienArr, 15),
+          jp: puskesmasName + ' ' + safeArrayText(dataPasienArr, 12),
         }
         pasienTglLahir = dataPasien.tglLahir
         nik = dataPasien.nik
@@ -172,18 +181,19 @@ if ($('#label2PDF').length === 0) {
         empt = true
 
       } else {
+        const tglLahirRaw = safeArrayText(dataPasienArr, 13).split('/');
         dataPasien = {
-          rm: dataPasienArr[4].querySelector('b').textContent.trim().toUpperCase(),
-          nik: dataPasienArr[5].querySelector('b').textContent.trim(),
-          noKartu: dataPasienArr[6].querySelector('b').textContent.trim(),
-          nama: dataPasienArr[7].querySelector('b').textContent.trim(),
-          kk: dataPasienArr[8].querySelector('b').textContent.trim(),
-          alamat: dataPasienArr[9].querySelector('b').textContent.trim(),
-          jk: dataPasienArr[12].querySelector('b').textContent.trim(),
+          rm: safeArrayText(dataPasienArr, 4).toUpperCase(),
+          nik: safeArrayText(dataPasienArr, 5),
+          noKartu: safeArrayText(dataPasienArr, 6),
+          nama: safeArrayText(dataPasienArr, 7),
+          kk: safeArrayText(dataPasienArr, 8),
+          alamat: safeArrayText(dataPasienArr, 9),
+          jk: safeArrayText(dataPasienArr, 12),
           desa: '',
-          tglLahir: dataPasienArr[13].querySelector('b').textContent.trim().split('/')[0],
-          umur: dataPasienArr[13].querySelector('b').textContent.trim().split('/')[1],
-          jp: puskesmasName + ' ' + dataPasienArr[11].querySelector('b').textContent.trim(),
+          tglLahir: tglLahirRaw[0] || '',
+          umur: tglLahirRaw[1] || '',
+          jp: puskesmasName + ' ' + safeArrayText(dataPasienArr, 11),
         }
         pasienTglLahir = dataPasien.tglLahir
         nik = dataPasien.nik
@@ -379,8 +389,11 @@ if ($('#drug2PDF').length === 0) {
     obat.ket2 = ''
     obat.nama = obat.nama.replace(/[()]/g, " ")
 
-    const tanggal = document.querySelector('.tanggal').textContent.split(',')[1].trim().split('-')[0].trim()
-    const jam = document.querySelector('.tanggal').textContent.split(',')[1].trim().split('-')[1].trim()
+    const tanggalElem = safeQuerySelector('.tanggal');
+    const tanggalText = tanggalElem ? tanggalElem.textContent : '';
+    const tanggalParts = tanggalText.split(',');
+    const tanggal = tanggalParts[1] ? tanggalParts[1].trim().split('-')[0].trim() : '';
+    const jam = tanggalParts[1] ? tanggalParts[1].trim().split('-')[1].trim() : '';
 
     while (obat.nama.length > 30) {
       obat.nama = obat.nama.trim().split(' ')
@@ -399,56 +412,63 @@ if ($('#drug2PDF').length === 0) {
     }
 
     // console.log(pasienEl)
-    const dataPasienArr = [...document.querySelector(pasienEl).querySelectorAll('div')]
+    const pasienContainer = safeQuerySelector(pasienEl);
+    if (!pasienContainer) {
+      console.warn('[content_script] Patient container not found');
+      return;
+    }
+    const dataPasienArr = safeQuerySelectorAll('div', pasienContainer);
 
     let dataPasien
 
     if (el === 'obat2') {
       dataPasien = {
-        rm: dataPasienArr[0].querySelector('b').textContent.trim().toUpperCase(),
-        nik: dataPasienArr[1].querySelector('b').textContent.trim(),
-        noKartu: dataPasienArr[2].querySelector('b').textContent.trim(),
-        nama: dataPasienArr[3].querySelector('b').textContent.trim(),
-        kk: dataPasienArr[4].querySelector('b').textContent.trim(),
-        alamat: dataPasienArr[5].querySelector('b').textContent.trim(),
-        jk: dataPasienArr[6].querySelector('b').textContent.trim(),
-        desa: dataPasienArr[7].querySelector('b').textContent.trim(),
-        tglLahir: dataPasienArr[8].querySelector('b').textContent.trim(),
-        umur: dataPasienArr[9].querySelector('b').textContent.trim(),
-        jp: puskesmasName + ' ' + dataPasienArr[10].querySelector('b').textContent.trim(),
+        rm: safeArrayText(dataPasienArr, 0).toUpperCase(),
+        nik: safeArrayText(dataPasienArr, 1),
+        noKartu: safeArrayText(dataPasienArr, 2),
+        nama: safeArrayText(dataPasienArr, 3),
+        kk: safeArrayText(dataPasienArr, 4),
+        alamat: safeArrayText(dataPasienArr, 5),
+        jk: safeArrayText(dataPasienArr, 6),
+        desa: safeArrayText(dataPasienArr, 7),
+        tglLahir: safeArrayText(dataPasienArr, 8),
+        umur: safeArrayText(dataPasienArr, 9),
+        jp: puskesmasName + ' ' + safeArrayText(dataPasienArr, 10),
       }
 
     } else if (el === 'add_drug') {
+      const tglLahirRaw = safeArrayText(dataPasienArr, 14).split('/');
       dataPasien = {
-        rm: dataPasienArr[5].querySelector('b').textContent.trim().toUpperCase(),
-        nik: dataPasienArr[6].querySelector('b').textContent.trim(),
-        noKartu: dataPasienArr[7].querySelector('b').textContent.trim(),
-        nama: dataPasienArr[8].querySelector('b').textContent.trim(),
-        kk: dataPasienArr[9].querySelector('b').textContent.trim(),
-        alamat: dataPasienArr[10].querySelector('b').textContent.trim(),
-        jk: dataPasienArr[13].querySelector('b').textContent.trim(),
+        rm: safeArrayText(dataPasienArr, 5).toUpperCase(),
+        nik: safeArrayText(dataPasienArr, 6),
+        noKartu: safeArrayText(dataPasienArr, 7),
+        nama: safeArrayText(dataPasienArr, 8),
+        kk: safeArrayText(dataPasienArr, 9),
+        alamat: safeArrayText(dataPasienArr, 10),
+        jk: safeArrayText(dataPasienArr, 13),
         desa: '',
-        tglLahir: dataPasienArr[14].querySelector('b').textContent.trim().split('/')[0],
-        umur: dataPasienArr[14].querySelector('b').textContent.trim().split('/')[1],
-        bb: dataPasienArr[15].querySelector('b').textContent.trim(),
-        jp: puskesmasName + ' ' + dataPasienArr[12].querySelector('b').textContent.trim(),
+        tglLahir: tglLahirRaw[0] || '',
+        umur: tglLahirRaw[1] || '',
+        bb: safeArrayText(dataPasienArr, 15),
+        jp: puskesmasName + ' ' + safeArrayText(dataPasienArr, 12),
       }
 
       // tanggal = dataPasienArr[0].querySelector('b').textContent.trim()
 
     } else {
+      const tglLahirRaw = safeArrayText(dataPasienArr, 13).split('/');
       dataPasien = {
-        rm: dataPasienArr[4].querySelector('b').textContent.trim().toUpperCase(),
-        nik: dataPasienArr[5].querySelector('b').textContent.trim(),
-        noKartu: dataPasienArr[6].querySelector('b').textContent.trim(),
-        nama: dataPasienArr[7].querySelector('b').textContent.trim(),
-        kk: dataPasienArr[8].querySelector('b').textContent.trim(),
-        alamat: dataPasienArr[9].querySelector('b').textContent.trim(),
-        jk: dataPasienArr[12].querySelector('b').textContent.trim(),
+        rm: safeArrayText(dataPasienArr, 4).toUpperCase(),
+        nik: safeArrayText(dataPasienArr, 5),
+        noKartu: safeArrayText(dataPasienArr, 6),
+        nama: safeArrayText(dataPasienArr, 7),
+        kk: safeArrayText(dataPasienArr, 8),
+        alamat: safeArrayText(dataPasienArr, 9),
+        jk: safeArrayText(dataPasienArr, 12),
         desa: '',
-        tglLahir: dataPasienArr[13].querySelector('b').textContent.trim().split('/')[0],
-        umur: dataPasienArr[13].querySelector('b').textContent.trim().split('/')[1],
-        jp: puskesmasName + ' ' + dataPasienArr[11].querySelector('b').textContent.trim(),
+        tglLahir: tglLahirRaw[0] || '',
+        umur: tglLahirRaw[1] || '',
+        jp: puskesmasName + ' ' + safeArrayText(dataPasienArr, 11),
       }
 
     }
