@@ -197,7 +197,7 @@ if ($('#label2PDF').length === 0) {
         pasienNama = dataPasien.nama
         pusk = dataPasien.jp
         // eslint-disable-next-line no-console
-        console.log(dataPasien)
+        // console.log(dataPasien)
         empt = true
 
       }
