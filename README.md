@@ -46,9 +46,22 @@ Setelah ekstensi dikonfigurasi dengan benar:
 3.  Klik ikon print pada baris obat yang diinginkan untuk menghasilkan PDF label obat.
 4.  PDF akan ditampilkan dalam iframe tersembunyi dan siap untuk dicetak.
 
+### Skrining Kesehatan BPJS Otomatis
+
+1.  Ketika Anda membuka halaman detail BPJS (`/j-care/bpjs/apis/detail/`) yang menampilkan pesan "Anda belum melakukan skrining kesehatan", ekstensi akan secara otomatis:
+    *   Menampilkan loading indicator dengan progress status
+    *   Mengambil nomor kartu BPJS dari halaman
+    *   Melakukan verifikasi data pasien BPJS
+    *   Membuka halaman skrining BPJS (https://webskrining.bpjs-kesehatan.go.id/skrining) di window baru
+    *   Mengisi form skrining secara otomatis dengan NIK dan tanggal lahir dari data verifikasi
+2.  Anda tinggal melanjutkan proses skrining di halaman yang sudah terbuka.
+3.  Data skrining akan otomatis dihapus setelah digunakan untuk keamanan.
+
 ## Catatan Penting
 *   Pastikan URL j-care yang Anda masukkan di halaman opsi adalah benar dan lengkap agar ekstensi dapat berfungsi. Perhatikan contoh format yang diberikan.
 *   Untuk label identitas pasien, nama Puskesmas yang tercetak akan sesuai dengan yang Anda masukkan di halaman opsi. Jika Anda mengalami masalah dimana nama Puskesmas kembali ke nama default ("PKM Default"), coba simpan ulang pengaturan di halaman Opsi dan segarkan halaman j-care.
+*   Untuk fitur skrining BPJS otomatis, pastikan popup blocker tidak menghalangi window baru. Jika popup diblokir, ekstensi akan otomatis mencoba membuka di tab baru.
+*   Data verifikasi BPJS disimpan sementara di chrome.storage dan akan otomatis dihapus setelah digunakan atau setelah 5 menit untuk keamanan.
 
 ## Keamanan & Best Practices
 

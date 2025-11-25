@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.3.0] - 2025-11-25
+
+### Added
+- **BPJS Skrining Otomatis**: Ekstensi sekarang otomatis mendeteksi pesan skrining kesehatan BPJS dan membuka halaman skrining
+  - Auto-detect pesan "Anda belum melakukan skrining kesehatan" di halaman detail BPJS
+  - Otomatis mengambil nomor kartu BPJS dari halaman
+  - Melakukan verifikasi BPJS melalui API `/j-care/bpjs/apis/verifikasi/noka/`
+  - Membuka window baru ke https://webskrining.bpjs-kesehatan.go.id/skrining
+  - Auto-fill form skrining dengan NIK dan tanggal lahir dari data verifikasi
+  - Loading indicator dengan progress status yang detail
+  - Menggunakan chrome.storage untuk cross-domain data sharing
+  - Auto-cleanup data setelah digunakan atau setelah 5 menit
+
+### Changed
+- Hardcoded "PKM Jayengan" di `content_script.js` diganti dengan `puskesmasName` dari chrome.storage settings
+- Improved error handling untuk verifikasi BPJS dengan jQuery AJAX dan fallback ke fetch API
+
+### Technical
+- Created `bpjs_skrining.js` - Main script untuk deteksi dan verifikasi BPJS
+- Created `bpjs_skrining_autofill.js` - Script untuk auto-fill form skrining di website BPJS
+- Updated `background.js` untuk inject scripts di halaman BPJS detail dan skrining
+- Menggunakan MutationObserver untuk deteksi dinamis pesan skrining
+- Cross-domain data transfer menggunakan chrome.storage.local
+
 ## [0.2.0] - 2025-11-25
 
 ### Fixed

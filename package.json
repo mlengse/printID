@@ -1,7 +1,7 @@
 {
   "name": "print-id-extension",
-  "version": "0.2.0",
-  "description": "Chrome extension for printing patient ID and medication labels from j-care system",
+  "version": "0.3.0",
+  "description": "Chrome extension for printing patient ID and medication labels from j-care system with BPJS screening automation",
   "main": "background.js",
   "scripts": {
     "lint": "eslint *.js",
@@ -14,7 +14,10 @@
     "healthcare",
     "patient-labels",
     "barcode",
-    "pdf-generator"
+    "pdf-generator",
+    "bpjs",
+    "bpjs-screening",
+    "automation"
   ],
   "author": "",
   "license": "MIT",
