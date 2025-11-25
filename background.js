@@ -48,8 +48,8 @@ chrome.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
       chrome.scripting.executeScript({
         target: { tabId: tab.id },
         files: ['bpjs_skrining_autofill.js']
-      }).then(() => {
-        console.log('BPJS skrining autofill script injected successfully');
+      // }).then(() => {
+        // console.log('BPJS skrining autofill script injected successfully');
       }).catch(err => console.error('Failed to execute BPJS skrining autofill script:', err));
     }
   }

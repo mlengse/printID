@@ -14,15 +14,15 @@
         const data = result['bpjs-skrining-data'];
         
         if (!data) {
-          console.log('BPJS Skrining AutoFill: Tidak ada data di chrome.storage');
+          // console.log('BPJS Skrining AutoFill: Tidak ada data di chrome.storage');
           return;
         }
         
-        console.log('BPJS Skrining AutoFill: Data ditemukan:', data);
+        // console.log('BPJS Skrining AutoFill: Data ditemukan:', data);
         
         // Cek apakah data tidak terlalu lama (max 5 menit)
         if (data.timestamp && (Date.now() - data.timestamp > 5 * 60 * 1000)) {
-          console.log('BPJS Skrining AutoFill: Data sudah kadaluarsa');
+          // console.log('BPJS Skrining AutoFill: Data sudah kadaluarsa');
           chrome.storage.local.remove('bpjs-skrining-data');
           return;
         }
@@ -47,10 +47,10 @@
         const nikInput = document.querySelector('#nik_txt');
         const tglLahirInput = document.querySelector('#TglLahir_src');
         
-        console.log(`BPJS Skrining AutoFill: Attempt ${attemptCount}/${maxAttempts}`, {
-          nikInput: !!nikInput,
-          tglLahirInput: !!tglLahirInput
-        });
+        // console.log(`BPJS Skrining AutoFill: Attempt ${attemptCount}/${maxAttempts}`, {
+        //   nikInput: !!nikInput,
+        //   tglLahirInput: !!tglLahirInput
+        // });
         
         if (nikInput && tglLahirInput) {
           clearInterval(checkInterval);
@@ -58,7 +58,7 @@
           // Isi NIK
           if (data.nik) {
             nikInput.value = data.nik;
-            console.log('BPJS Skrining AutoFill: NIK diisi:', data.nik);
+            // console.log('BPJS Skrining AutoFill: NIK diisi:', data.nik);
             
             // Trigger berbagai event untuk memastikan form mendeteksi perubahan
             nikInput.dispatchEvent(new Event('input', { bubbles: true }));
@@ -69,7 +69,7 @@
           // Isi tanggal lahir
           if (data.tglLahir) {
             tglLahirInput.value = data.tglLahir;
-            console.log('BPJS Skrining AutoFill: Tanggal lahir diisi:', data.tglLahir);
+            // console.log('BPJS Skrining AutoFill: Tanggal lahir diisi:', data.tglLahir);
             
             // Trigger berbagai event
             tglLahirInput.dispatchEvent(new Event('input', { bubbles: true }));
@@ -77,7 +77,7 @@
             tglLahirInput.dispatchEvent(new Event('blur', { bubbles: true }));
           }
           
-          console.log('BPJS Skrining AutoFill: Form berhasil diisi');
+          // console.log('BPJS Skrining AutoFill: Form berhasil diisi');
           
           // Hapus data dari chrome.storage setelah digunakan
           if (typeof chrome !== 'undefined' && chrome.storage) {

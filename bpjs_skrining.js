@@ -10,7 +10,7 @@
     if (nokartuSpan) {
       const noBPJS = nokartuSpan.textContent.trim().replace(/\s/g, '').replace(/&nbsp;/g, '');
       if (noBPJS) {
-        console.log('Nomor BPJS ditemukan (class nokartu):', noBPJS);
+        // console.log('Nomor BPJS ditemukan (class nokartu):', noBPJS);
         return noBPJS;
       }
     }
@@ -26,7 +26,7 @@
           if (span) {
             const noBPJS = span.textContent.trim().replace(/\s/g, '').replace(/&nbsp;/g, '');
             if (noBPJS) {
-              console.log('Nomor BPJS ditemukan (label No. Kartu):', noBPJS);
+              // console.log('Nomor BPJS ditemukan (label No. Kartu):', noBPJS);
               return noBPJS;
             }
           }
@@ -35,7 +35,7 @@
     }
     
     console.error('Nomor BPJS tidak ditemukan dengan semua metode');
-    console.log('Mencari span.nokartu:', document.querySelector('span.nokartu'));
+    // console.log('Mencari span.nokartu:', document.querySelector('span.nokartu'));
     return null;
   }
 
@@ -53,13 +53,13 @@
       const today = formatDate(new Date());
       const apiUrl = `/j-care/bpjs/apis/verifikasi/noka/${noBPJS}/${today}/001`;
       
-      console.log('Melakukan verifikasi BPJS:', apiUrl);
+      // console.log('Melakukan verifikasi BPJS:', apiUrl);
       
       // Gunakan jQuery jika tersedia, karena server mungkin butuh header khusus dari jQuery
       if (typeof $ !== 'undefined' && $.getJSON) {
         return new Promise((resolve, reject) => {
           $.getJSON(apiUrl, function(data) {
-            console.log('Data verifikasi BPJS:', data);
+            // console.log('Data verifikasi BPJS:', data);
             resolve(data);
           }).fail(function(jqXHR, textStatus, errorThrown) {
             console.error('Error verifikasi BPJS (jQuery):', textStatus, errorThrown);
@@ -83,7 +83,7 @@
         }
         
         const data = await response.json();
-        console.log('Data verifikasi BPJS:', data);
+        // console.log('Data verifikasi BPJS:', data);
         
         return data;
       }
@@ -203,7 +203,7 @@
       return;
     }
     
-    console.log('Nomor BPJS ditemukan:', noBPJS);
+    // console.log('Nomor BPJS ditemukan:', noBPJS);
     updateLoadingText('Melakukan verifikasi BPJS...');
     
     // Lakukan verifikasi BPJS
@@ -226,7 +226,7 @@
         timestamp: Date.now()
       };
       chrome.storage.local.set({ 'bpjs-skrining-data': skriningData }, function() {
-        console.log('Data skrining disimpan ke chrome.storage:', skriningData);
+        // console.log('Data skrining disimpan ke chrome.storage:', skriningData);
       });
     }
     
@@ -242,7 +242,7 @@
       // Fokus ke window baru
       skriningWindow.focus();
       
-      console.log('Window skrining BPJS berhasil dibuka');
+      // console.log('Window skrining BPJS berhasil dibuka');
       updateLoadingText('Menunggu halaman skrining siap...');
       
       // Hapus loading setelah 3 detik (waktu untuk halaman skrining load)
@@ -266,7 +266,7 @@
       
       if (newTab) {
         newTab.focus();
-        console.log('Tab skrining BPJS berhasil dibuka');
+        // console.log('Tab skrining BPJS berhasil dibuka');
         updateLoadingText('Tab skrining berhasil dibuka!');
         setTimeout(removeLoadingIndicator, 2000);
       } else {
@@ -294,10 +294,10 @@
         tglLahirInput.value = data.tglLahir;
       }
       
-      console.log('Form skrining berhasil diisi');
+      // console.log('Form skrining berhasil diisi');
     } catch (error) {
       console.error('Tidak dapat mengisi form karena cross-origin restriction:', error);
-      console.log('Data tersimpan di localStorage dengan key "bpjs-skrining-data"');
+      // console.log('Data tersimpan di localStorage dengan key "bpjs-skrining-data"');
     }
   }
 
