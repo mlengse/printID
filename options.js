@@ -1,18 +1,28 @@
 // Saves options to chrome.storage.local.
 function save_options() {
-  const jcareUrl = document.getElementById('jcareUrl').value;
-  const puskesmasName = document.getElementById('puskesmasName').value;
+  const jcareUrlInput = safeGetById('jcareUrl');
+  const puskesmasNameInput = safeGetById('puskesmasName');
+  
+  if (!jcareUrlInput || !puskesmasNameInput) {
+    console.error('[options.js] Required input elements not found');
+    return;
+  }
+
+  const jcareUrl = jcareUrlInput.value;
+  const puskesmasName = puskesmasNameInput.value;
 
   chrome.storage.local.set({
     jcareUrl: jcareUrl,
     puskesmasName: puskesmasName
   }, function() {
     // Update status to let user know options were saved.
-    const status = document.getElementById('status');
-    status.textContent = 'Pengaturan disimpan.';
-    setTimeout(function() {
-      status.textContent = '';
-    }, 1500);
+    const status = safeGetById('status');
+    if (status) {
+      status.textContent = 'Pengaturan disimpan.';
+      setTimeout(function() {
+        status.textContent = '';
+      }, 1500);
+    }
   });
 }
 
@@ -23,10 +33,19 @@ function restore_options() {
     jcareUrl: '', // Default value
     puskesmasName: '' // Default value
   }, function(items) {
-    document.getElementById('jcareUrl').value = items.jcareUrl;
-    document.getElementById('puskesmasName').value = items.puskesmasName;
+    const jcareUrlInput = safeGetById('jcareUrl');
+    const puskesmasNameInput = safeGetById('puskesmasName');
+    
+    if (jcareUrlInput) jcareUrlInput.value = items.jcareUrl;
+    if (puskesmasNameInput) puskesmasNameInput.value = items.puskesmasName;
   });
 }
 
 document.addEventListener('DOMContentLoaded', restore_options);
-document.getElementById('save').addEventListener('click', save_options);
+
+const saveBtn = safeGetById('save');
+if (saveBtn) {
+  saveBtn.addEventListener('click', save_options);
+} else {
+  console.error('[options.js] Save button not found');
+}
