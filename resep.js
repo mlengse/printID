@@ -1,6 +1,6 @@
 function waitForElm(elm) {
   return new Promise( resolve => {
-    var checkExist = setInterval(function() {
+    const checkExist = setInterval(function() {
       if ($(elm).length) {
         // console.log(`${elm} Exists!`);
         clearInterval(checkExist);
@@ -11,15 +11,15 @@ function waitForElm(elm) {
 }
 window.sudah = false
 $(document).ready(() => {
-  let submitId = document.querySelector('input[update="view_pemakaian_obat"]').getAttribute('id')
+  const submitId = document.querySelector('input[update="view_pemakaian_obat"]').getAttribute('id');
   // console.log(submitId)
   // let timeStamp = 0
-  $(`#${submitId}`).on('click', async function(evt) {
+  $(`#${submitId}`).on('click', async function(_evt) {
     if(!window.sudah){
       // console.log(window.sudah)
       window.sudah = true
 
-      let ada = $('table.nested-table').length
+      const ada = $('table.nested-table').length
       if(ada){
         // console.log('loading')
         // console.log('ada')
@@ -27,11 +27,11 @@ $(document).ready(() => {
         await waitForElm('#loading[style="margin: 0px 0px 10px 10px; display: none;"]')
       }
       await waitForElm('#view_pemakaian_obat')
-      let table = await waitForElm('table.nested-table')
+      const table = await waitForElm('table.nested-table')
       if(table){
-        let rows = table.querySelectorAll('tr')
+        const rows = table.querySelectorAll('tr')
         for (let i = 0; i < rows.length; i++) {
-          let row = rows[i]
+          const row = rows[i]
           let orgCol = document.getElementById(`org${i}`)
           if(!orgCol){
             orgCol = row.insertCell(4)
@@ -51,12 +51,12 @@ $(document).ready(() => {
             ratCol.style.verticalAlign = 'inherit'
           }
   
-          let links = row.querySelectorAll('a')
+          const links = row.querySelectorAll('a')
           if(!links.length ){
             if(!orgCol.textContent.length){
-              let text = document.createTextNode('Orang')
+              const text = document.createTextNode('Orang')
               orgCol.appendChild(text)
-              let textr = document.createTextNode('Rata2')
+              const textr = document.createTextNode('Rata2')
               ratCol.appendChild(textr)
             }
           } else {
@@ -64,23 +64,23 @@ $(document).ready(() => {
             // console.log('table is ready');
   
   
-            for(let link of links){
+            for(const link of links){
               // console.log(link.textContent);
-              let href = link.getAttribute('href')
+              const href = link.getAttribute('href')
               if( href && href.includes('pasien')){
                 $.ajax(href).done( res => {
                   // console.log()
                   if(!orgCol.textContent.length && res){
-                    let temp = document.createElement('div')
+                    const temp = document.createElement('div')
                     temp.innerHTML = res
-                    let rows = temp.querySelectorAll('tr')
+                    const rows = temp.querySelectorAll('tr')
                     // console.log(rows.length)
-                    let text = document.createTextNode(`${rows.length-1}`)
+                    const text = document.createTextNode(`${rows.length-1}`)
                     orgCol.appendChild(text)
-                    let jmls = row.querySelectorAll('td')
-                    let jml = Number(jmls[6].textContent.split('.').join(''))
+                    const jmls = row.querySelectorAll('td')
+                    const jml = Number(jmls[6].textContent.split('.').join(''))
                     // console.log(jml)
-                    let textr = document.createTextNode(`${Math.ceil(jml/(rows.length-1))}`)
+                    const textr = document.createTextNode(`${Math.ceil(jml/(rows.length-1))}`)
                     ratCol.appendChild(textr)
       
                   }
