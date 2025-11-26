@@ -1,23 +1,25 @@
+// Global variables shared across both blocks
+let puskesmasName = 'PKM Default'; // Default fallback
+
+// Listen for puskesmas name from background script
+chrome.runtime.onMessage.addListener((message) => {
+  if (message?.type === 'SET_PUSKESMAS_NAME') {
+    puskesmasName = message.puskesmasName || puskesmasName;
+  }
+});
+
+// Helper function to safely extract text from array element
+function safeArrayText(arr, index, selector = 'b') {
+  if (!arr || !arr[index]) return '';
+  const elem = arr[index].querySelector(selector);
+  return elem ? elem.textContent.trim() : '';
+}
+
 if ($('#label2PDF').length === 0) {
   let al;
   let empt;
   // let jaminan;
   let el;
-  let puskesmasName = 'PKM Default'; // Default fallback
-
-  // Helper function to safely extract text from array element
-  function safeArrayText(arr, index, selector = 'b') {
-    if (!arr || !arr[index]) return '';
-    const elem = arr[index].querySelector(selector);
-    return elem ? elem.textContent.trim() : '';
-  }
-
-  // Listen for puskesmas name from background script
-  chrome.runtime.onMessage.addListener((message) => {
-    if (message?.type === 'SET_PUSKESMAS_NAME') {
-      puskesmasName = message.puskesmasName || puskesmasName;
-    }
-  });
 
   if ($('#obat2').length) {
     el = 'obat2'
