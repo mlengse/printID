@@ -1,12 +1,17 @@
-// Global variables shared across both blocks
-let puskesmasName = 'PKM Default'; // Default fallback
+// Global variables shared across both blocks (use window to avoid redeclaration)
+if (typeof window.puskesmasName === 'undefined') {
+  window.puskesmasName = 'PKM Default'; // Default fallback
+}
 
-// Listen for puskesmas name from background script
-chrome.runtime.onMessage.addListener((message) => {
-  if (message?.type === 'SET_PUSKESMAS_NAME') {
-    puskesmasName = message.puskesmasName || puskesmasName;
-  }
-});
+// Listen for puskesmas name from background script (only add listener once)
+if (!window.puskesmasListenerAdded) {
+  window.puskesmasListenerAdded = true;
+  chrome.runtime.onMessage.addListener((message) => {
+    if (message?.type === 'SET_PUSKESMAS_NAME') {
+      window.puskesmasName = message.puskesmasName || window.puskesmasName;
+    }
+  });
+}
 
 // Helper function to safely extract text from array element
 function safeArrayText(arr, index, selector = 'b') {
@@ -29,9 +34,9 @@ if ($('#label2PDF').length === 0) {
 
   function getPusk(jaminan) {
     if (jaminan) {
-      return puskesmasName + " " + jaminan;
+      return window.puskesmasName + " " + jaminan;
     }
-    return puskesmasName;
+    return window.puskesmasName;
   }
 
   function pasienUm() {
@@ -96,7 +101,7 @@ if ($('#label2PDF').length === 0) {
         desa: safeArrayText(dataPasienArr, 7),
         tglLahir: safeArrayText(dataPasienArr, 8),
         umur: safeArrayText(dataPasienArr, 9),
-        jp: puskesmasName + ' ' + safeArrayText(dataPasienArr, 10),
+        jp: window.puskesmasName + ' ' + safeArrayText(dataPasienArr, 10),
       }
 
       pasienTglLahir = dataPasien.tglLahir
@@ -136,7 +141,7 @@ if ($('#label2PDF').length === 0) {
           desa: safeArrayText(dataPasienArr, 7),
           tglLahir: safeArrayText(dataPasienArr, 8),
           umur: safeArrayText(dataPasienArr, 9),
-          jp: puskesmasName + ' ' + safeArrayText(dataPasienArr, 10),
+          jp: window.puskesmasName + ' ' + safeArrayText(dataPasienArr, 10),
         }
         pasienTglLahir = dataPasien.tglLahir
         nik = dataPasien.nik
@@ -166,7 +171,7 @@ if ($('#label2PDF').length === 0) {
           tglLahir: tglLahirRaw[0] || '',
           umur: tglLahirRaw[1] || '',
           bb: safeArrayText(dataPasienArr, 15),
-          jp: puskesmasName + ' ' + safeArrayText(dataPasienArr, 12),
+          jp: window.puskesmasName + ' ' + safeArrayText(dataPasienArr, 12),
         }
         pasienTglLahir = dataPasien.tglLahir
         nik = dataPasien.nik
@@ -195,7 +200,7 @@ if ($('#label2PDF').length === 0) {
           desa: '',
           tglLahir: tglLahirRaw[0] || '',
           umur: tglLahirRaw[1] || '',
-          jp: puskesmasName + ' ' + safeArrayText(dataPasienArr, 11),
+          jp: window.puskesmasName + ' ' + safeArrayText(dataPasienArr, 11),
         }
         pasienTglLahir = dataPasien.tglLahir
         nik = dataPasien.nik
@@ -322,19 +327,19 @@ if ($('#label2PDF').length === 0) {
       $(svg).find('rect').map(function () {
         const $x = $(this).attr('x');
         const strX = 0 + ($x * 0.004481);
-        const strY = 1.05;
+        const strY = 0.2;
         const $width = $(this).attr('width');
         const strW = ($width * 0.004481);
         const strH = 0.35;
         $.AddRect(strX, strY, strW, strH);
       });
-      $.AddText(0.1, 0.12, noRM, 14);
-      $.AddText(0.87, 0.12, noA, 10);
-      $.AddText(0.1, 0.9, pasienNama, 10);
-      $.AddText(0.1, 0.75, nik, 10);
-      $.AddText(0.1, 0.6, pasien, 10);
-      $.AddText(0.1, 0.45, alamat, 8);
-      $.AddText(0.1, 0.3, pusk, 10);
+      $.AddText(0.1, 0.62, noRM, 14);
+      $.AddText(0.87, 0.62, noA, 10);
+      $.AddText(0.1, 1.30, pasienNama, 10);
+      $.AddText(0.1, 1.17, nik, 10);
+      $.AddText(0.1, 1.04, pasien, 10);
+      $.AddText(0.1, 0.91, alamat, 8);
+      $.AddText(0.1, 0.78, pusk, 10);
       $.DrawPDF('labelframe');
 
     }
@@ -422,6 +427,7 @@ if ($('#drug2PDF').length === 0) {
     const dataPasienArr = safeQuerySelectorAll('div', pasienContainer);
 
     let dataPasien
+    let tglLahirRaw
 
     if (el === 'obat2') {
       dataPasien = {
@@ -435,11 +441,11 @@ if ($('#drug2PDF').length === 0) {
         desa: safeArrayText(dataPasienArr, 7),
         tglLahir: safeArrayText(dataPasienArr, 8),
         umur: safeArrayText(dataPasienArr, 9),
-        jp: puskesmasName + ' ' + safeArrayText(dataPasienArr, 10),
+        jp: window.puskesmasName + ' ' + safeArrayText(dataPasienArr, 10),
       }
 
     } else if (el === 'add_drug') {
-      const tglLahirRaw = safeArrayText(dataPasienArr, 14).split('/');
+      tglLahirRaw = safeArrayText(dataPasienArr, 14).split('/');
       dataPasien = {
         rm: safeArrayText(dataPasienArr, 5).toUpperCase(),
         nik: safeArrayText(dataPasienArr, 6),
@@ -452,13 +458,13 @@ if ($('#drug2PDF').length === 0) {
         tglLahir: tglLahirRaw[0] || '',
         umur: tglLahirRaw[1] || '',
         bb: safeArrayText(dataPasienArr, 15),
-        jp: puskesmasName + ' ' + safeArrayText(dataPasienArr, 12),
+        jp: window.puskesmasName + ' ' + safeArrayText(dataPasienArr, 12),
       }
 
       // tanggal = dataPasienArr[0].querySelector('b').textContent.trim()
 
     } else {
-      const tglLahirRaw = safeArrayText(dataPasienArr, 13).split('/');
+      tglLahirRaw = safeArrayText(dataPasienArr, 13).split('/');
       dataPasien = {
         rm: safeArrayText(dataPasienArr, 4).toUpperCase(),
         nik: safeArrayText(dataPasienArr, 5),
@@ -470,14 +476,12 @@ if ($('#drug2PDF').length === 0) {
         desa: '',
         tglLahir: tglLahirRaw[0] || '',
         umur: tglLahirRaw[1] || '',
-        jp: puskesmasName + ' ' + safeArrayText(dataPasienArr, 11),
+        jp: window.puskesmasName + ' ' + safeArrayText(dataPasienArr, 11),
       }
 
     }
 
-    // console.log(el, dataPasien)
-
-
+  // console.log(el, dataPasien)
 
     while (dataPasien.nama.length > 28) {
       dataPasien.nama = dataPasien.nama.trim().split(' ')
@@ -516,7 +520,7 @@ if ($('#drug2PDF').length === 0) {
     $(svg).find('rect').map(function () {
       const $x = $(this).attr('x');
       const strX = 0 + ($x * 0.004481);
-      const strY = 1.4;
+      const strY = 1.2;
       const $width = $(this).attr('width');
       const strW = ($width * 0.004481);
       const strH = 0.45;
@@ -534,15 +538,15 @@ if ($('#drug2PDF').length === 0) {
       alamat.pop()
       alamat = alamat.join(' ').trim()
     }
-    $.AddText(wid + 0.05, 1.4, dataPasien.rm, 16);
-    $.AddText(wid + 0.05, 1.7, `${tanggal}`, 7);
-    $.AddText(wid + 0.05, 1.6, `${jam}`, 7);
-    $.AddText(0.1, 1.25, dataPasien.nama, 10);
-    $.AddText(0.1, 1.13, `${dataPasien.jp}`, 8);
-    $.AddText(0.1, 1, `${dataPasien.jk} ${dataPasien.tglLahir.length ? `[${dataPasien.tglLahir}] ` : ''}${dataPasien.umur}${dataPasien.bb ? ` ${dataPasien.bb}` : ''}`, 8);
-    $.AddText(0.1, 0.85, `${alamat}`, 8);
-    $.AddRect(0.01, 0.8, 70, 0.01);
-    $.AddText(0.1, 0.65, obat.nama, 11);
+    $.AddText(wid + 0.05, 1.2, dataPasien.rm, 16);
+    $.AddText(wid + 0.05, 1.5, `${tanggal}`, 7);
+    $.AddText(wid + 0.05, 1.4, `${jam}`, 7);
+    $.AddText(0.1, 1.08, dataPasien.nama, 10);
+    $.AddText(0.1, 0.96, `${dataPasien.jp}`, 8);
+    $.AddText(0.1, 0.85, `${dataPasien.jk} ${dataPasien.tglLahir.length ? `[${dataPasien.tglLahir}] ` : ''}${dataPasien.umur}${dataPasien.bb ? ` ${dataPasien.bb}` : ''}`, 8);
+    $.AddText(0.1, 0.74, `${alamat}`, 8);
+    $.AddRect(0.01, 0.69, 70, 0.01);
+    $.AddText(0.1, 0.56, obat.nama, 11);
     let jmlH = 0.25
     if (obat.ket.length) {
       obat.ket3 = ''
@@ -551,19 +555,19 @@ if ($('#drug2PDF').length === 0) {
         obat.ket3 = `${obat.ket.pop()} ${obat.ket3}`
         obat.ket = obat.ket.join(' ')
       }
-      $.AddText(0.2, 0.52, obat.ket, 8);
+      $.AddText(0.2, 0.44, obat.ket, 8);
       obat.ket3 = obat.ket3.trim()
       if (obat.ket3.length) {
-        $.AddText(0.2, 0.43, obat.ket3, 8);
+        $.AddText(0.2, 0.34, obat.ket3, 8);
         jmlH = 0
       } else {
         jmlH = 0.12
       }
     }
-    $.AddText(2.25, 0.45, `[${obat.jml}]`, 16);
-    $.AddText(0.1, 0.2 + jmlH, obat.dosis, 12);
+    $.AddText(2.25, 0.38, `[${obat.jml}]`, 16);
+    $.AddText(0.1, 0.13 + jmlH, obat.dosis, 12);
     if (obat.ket2.length) {
-      $.AddText(0.2, 0.1 + jmlH - 0.01, obat.ket2, 8);
+      $.AddText(0.2, 0.03 + jmlH - 0.01, obat.ket2, 8);
     }
 
     $.DrawPDF('obatframe');
