@@ -69,11 +69,20 @@
 
   console.log('BPJS AutoFill (Page): Solver tersedia, memulai autofill...');
   
+  // Flag to stop solving after success
+  let captchaSolved = false;
+  let captchaObserver = null;
+  
   // Fill form first
   fillForm();
 
   // Fungsi untuk solve CAPTCHA
   async function solveCaptcha() {
+    // Skip if already solved
+    if (captchaSolved) {
+      console.log('BPJS AutoFill (Page): CAPTCHA already solved, skipping...');
+      return;
+    }
     console.log('BPJS AutoFill (Page): Mencari CAPTCHA elements...');
 
     // Wait for elements with retry
@@ -112,13 +121,107 @@
           const prediction = await solver.solve(captchaImg);
 
           if (prediction && prediction.length === 5) {
-            captchaInput.value = prediction;
-            captchaInput.dispatchEvent(new Event('input', { bubbles: true }));
-            captchaInput.dispatchEvent(new Event('change', { bubbles: true }));
-            console.log('BPJS AutoFill (Page): ✅ CAPTCHA solved:', prediction);
+            // Simulate human-like typing with full keyboard events
+            console.log('BPJS AutoFill (Page): Typing CAPTCHA with keyboard events...');
+            captchaInput.focus();
+            captchaInput.value = '';
             
-            // Show success notification
-            showNotification('success', 'CAPTCHA berhasil di-solve: ' + prediction);
+            let charIndex = 0;
+            const typeChar = () => {
+              if (charIndex < prediction.length) {
+                const char = prediction[charIndex];
+                const keyCode = char.charCodeAt(0);
+                
+                // Dispatch keydown
+                captchaInput.dispatchEvent(new KeyboardEvent('keydown', {
+                  key: char,
+                  code: 'Key' + char.toUpperCase(),
+                  keyCode: keyCode,
+                  which: keyCode,
+                  bubbles: true
+                }));
+                
+                // Dispatch keypress
+                captchaInput.dispatchEvent(new KeyboardEvent('keypress', {
+                  key: char,
+                  code: 'Key' + char.toUpperCase(),
+                  keyCode: keyCode,
+                  which: keyCode,
+                  charCode: keyCode,
+                  bubbles: true
+                }));
+                
+                // Update value
+                captchaInput.value += char;
+                
+                // Dispatch input event
+                captchaInput.dispatchEvent(new InputEvent('input', {
+                  inputType: 'insertText',
+                  data: char,
+                  bubbles: true
+                }));
+                
+                // Dispatch keyup
+                captchaInput.dispatchEvent(new KeyboardEvent('keyup', {
+                  key: char,
+                  code: 'Key' + char.toUpperCase(),
+                  keyCode: keyCode,
+                  which: keyCode,
+                  bubbles: true
+                }));
+                
+                charIndex++;
+                // Random delay between 80-200ms to mimic human typing
+                setTimeout(typeChar, 80 + Math.random() * 120);
+              } else {
+                // Done typing - dispatch change
+                captchaInput.dispatchEvent(new Event('change', { bubbles: true }));
+                console.log('BPJS AutoFill (Page): ✅ CAPTCHA solved:', prediction);
+                showNotification('success', 'CAPTCHA berhasil di-solve: ' + prediction);
+                
+                // Wait a bit then simulate Tab + Enter to click button
+                setTimeout(() => {
+                  const btn = document.querySelector('#btnCariPetugas');
+                  if (btn) {
+                    console.log('BPJS AutoFill (Page): Focusing button and pressing Enter...');
+                    btn.focus();
+                    
+                    // Simulate Enter keydown on button
+                    btn.dispatchEvent(new KeyboardEvent('keydown', {
+                      key: 'Enter',
+                      code: 'Enter',
+                      keyCode: 13,
+                      which: 13,
+                      bubbles: true
+                    }));
+                    
+                    // Simulate Enter keyup
+                    btn.dispatchEvent(new KeyboardEvent('keyup', {
+                      key: 'Enter',
+                      code: 'Enter',
+                      keyCode: 13,
+                      which: 13,
+                      bubbles: true
+                    }));
+                    
+                    // Also trigger click event 
+                    btn.click();
+                    showNotification('info', 'Mencari peserta...');
+                    
+                    // Mark as solved and stop observer
+                    captchaSolved = true;
+                    if (captchaObserver) {
+                      captchaObserver.disconnect();
+                      console.log('BPJS AutoFill (Page): Observer disconnected');
+                    }
+                    
+                    // Watch for Setuju button
+                    watchForSetujuButton();
+                  }
+                }, 300);
+              }
+            };
+            typeChar();
           } else {
             console.warn('BPJS AutoFill (Page): Invalid prediction:', prediction);
             showNotification('warning', 'CAPTCHA prediction invalid');
@@ -175,11 +278,42 @@
     }, 5000);
   }
 
+  // Function to watch for and click Setuju button
+  function watchForSetujuButton() {
+    console.log('BPJS AutoFill (Page): Watching for Setuju button...');
+    
+    const checkSetuju = setInterval(() => {
+      // Look for button with text containing 'Setuju' or 'setuju'
+      const buttons = document.querySelectorAll('button, input[type="button"], a.btn');
+      for (const btn of buttons) {
+        const text = btn.textContent || btn.value || '';
+        if (text.toLowerCase().includes('setuju')) {
+          console.log('BPJS AutoFill (Page): Found Setuju button:', text);
+          clearInterval(checkSetuju);
+          
+          // Click with delay
+          setTimeout(() => {
+            btn.focus();
+            btn.click();
+            showNotification('success', 'Klik Setuju...');
+            console.log('BPJS AutoFill (Page): Clicked Setuju button');
+          }, 500);
+          return;
+        }
+      }
+    }, 500);
+    
+    // Stop checking after 30 seconds
+    setTimeout(() => clearInterval(checkSetuju), 30000);
+  }
+
   // Start solving
   solveCaptcha();
 
-  // Also observe for CAPTCHA refresh
-  const observer = new MutationObserver((mutations) => {
+  // Also observe for CAPTCHA refresh (only if not solved)
+  captchaObserver = new MutationObserver((mutations) => {
+    if (captchaSolved) return;
+    
     for (const mutation of mutations) {
       for (const node of mutation.addedNodes) {
         if (node.nodeType === Node.ELEMENT_NODE) {
