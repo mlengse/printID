@@ -70,11 +70,15 @@ async function initializeSolver(modelBasePath = null) {
     // Configure ONNX Runtime - WASM files are in extension root
     ort.env.wasm.wasmPaths = extensionRoot;
     
+    // Disable SIMD and threading to avoid ES module import issues in Chrome extension
+    ort.env.wasm.numThreads = 1;
+    ort.env.wasm.simd = false;
+    
     // Load CTC model
     const ctcModelPath = basePath + (basePath.endsWith('/') ? '' : '/') + 'captcha_ctc.onnx';
     console.log('BPJS Solver: Loading CTC model...', ctcModelPath);
     ctcSession = await ort.InferenceSession.create(ctcModelPath, {
-      executionProviders: ['webgl', 'wasm']
+      executionProviders: ['wasm']  // Use wasm only, webgl can cause issues
     });
     console.log('BPJS Solver: ✅ CTC model loaded');
     console.log('BPJS Solver: Input names:', ctcSession.inputNames);

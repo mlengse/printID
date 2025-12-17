@@ -3,7 +3,6 @@ function save_options() {
   const jcareUrlInput = safeGetById('jcareUrl');
   const puskesmasNameInput = safeGetById('puskesmasName');
   const modelPathInput = safeGetById('modelPath');
-  const useEnsembleInput = safeGetById('useEnsemble');
   
   if (!jcareUrlInput || !puskesmasNameInput) {
     console.error('[options.js] Required input elements not found');
@@ -13,8 +12,7 @@ function save_options() {
   const settings = {
     jcareUrl: jcareUrlInput.value,
     puskesmasName: puskesmasNameInput.value,
-    modelPath: modelPathInput ? modelPathInput.value : '',
-    useEnsemble: useEnsembleInput ? useEnsembleInput.checked : true
+    modelPath: modelPathInput ? modelPathInput.value : ''
   };
 
   chrome.storage.local.set(settings, function() {
@@ -34,26 +32,22 @@ function restore_options() {
   chrome.storage.local.get({
     jcareUrl: '',
     puskesmasName: '',
-    modelPath: '',
-    useEnsemble: true
+    modelPath: ''
   }, function(items) {
     const jcareUrlInput = safeGetById('jcareUrl');
     const puskesmasNameInput = safeGetById('puskesmasName');
     const modelPathInput = safeGetById('modelPath');
-    const useEnsembleInput = safeGetById('useEnsemble');
     
     if (jcareUrlInput) jcareUrlInput.value = items.jcareUrl;
     if (puskesmasNameInput) puskesmasNameInput.value = items.puskesmasName;
     if (modelPathInput) modelPathInput.value = items.modelPath;
-    if (useEnsembleInput) useEnsembleInput.checked = items.useEnsemble;
   });
 }
 
-// Test model availability
+// Test model availability - now uses single CTC model
 async function testModels() {
   const modelStatus = safeGetById('modelStatus');
   const modelPathInput = safeGetById('modelPath');
-  const useEnsembleInput = safeGetById('useEnsemble');
   
   if (!modelStatus) return;
 
@@ -62,12 +56,9 @@ async function testModels() {
   modelStatus.innerHTML = '⏳ Memeriksa model...';
 
   const basePath = modelPathInput?.value || chrome.runtime.getURL('captcha-model/');
-  const useEnsemble = useEnsembleInput?.checked ?? true;
   
-  const requiredModels = ['bbox_detector.onnx', 'digit_model_0.onnx'];
-  if (useEnsemble) {
-    requiredModels.push('digit_model_1.onnx', 'digit_model_2.onnx');
-  }
+  // Single CTC model architecture
+  const requiredModels = ['captcha_ctc.onnx'];
 
   const results = [];
   let allFound = true;
@@ -88,13 +79,28 @@ async function testModels() {
     }
   }
 
+  // Also check config.json
+  const configUrl = basePath.endsWith('/') ? basePath + 'config.json' : basePath + '/config.json';
+  try {
+    const response = await fetch(configUrl);
+    if (response.ok) {
+      const config = await response.json();
+      results.push(`✅ config.json (${config.chars?.length || '?'} chars)`);
+    } else {
+      results.push(`⚠️ config.json (tidak ditemukan, akan gunakan default)`);
+    }
+  } catch (error) {
+    results.push(`⚠️ config.json (${error.message})`);
+  }
+
   if (allFound) {
     modelStatus.className = 'model-status success';
-    modelStatus.innerHTML = `<strong>✅ Semua model tersedia!</strong><br>${results.join('<br>')}`;
+    modelStatus.innerHTML = `<strong>✅ Model tersedia!</strong><br>${results.join('<br>')}<br><br>
+      <small>Model type: CNN-CTC End-to-End (Conv1D, no LSTM)</small>`;
   } else {
     modelStatus.className = 'model-status error';
-    modelStatus.innerHTML = `<strong>⚠️ Beberapa model tidak ditemukan:</strong><br>${results.join('<br>')}<br><br>
-      <small>Pastikan file model sudah di-copy ke folder yang benar.</small>`;
+    modelStatus.innerHTML = `<strong>⚠️ Model tidak ditemukan:</strong><br>${results.join('<br>')}<br><br>
+      <small>Pastikan file captcha_ctc.onnx sudah di-copy ke folder captcha-model/</small>`;
   }
 }
 
@@ -120,4 +126,3 @@ if (testBtn) {
     if (btn) btn.addEventListener('click', testModels);
   });
 }
-

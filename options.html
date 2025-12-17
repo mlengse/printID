@@ -37,15 +37,7 @@
     <label for="modelPath">Path Model ONNX:</label>
     <input type="text" id="modelPath" name="modelPath" placeholder="Kosongkan untuk default (extension/captcha-model/)">
     <div class="help-text">
-      Folder harus berisi: bbox_detector.onnx, digit_model_0.onnx, digit_model_1.onnx, digit_model_2.onnx
-    </div>
-
-    <label for="useEnsemble">
-      <input type="checkbox" id="useEnsemble" name="useEnsemble" checked>
-      Gunakan Ensemble (3 model) untuk akurasi maksimal
-    </label>
-    <div class="help-text">
-      Ensemble menggunakan 3 model dan voting untuk prediksi lebih akurat (~90% vs ~85%)
+      Model CTC end-to-end: captcha_ctc.onnx (CNN + Conv1D)
     </div>
 
     <button id="testModels">Test Model</button>
@@ -59,4 +51,3 @@
   <script src="options.js"></script>
 </body>
 </html>
-
