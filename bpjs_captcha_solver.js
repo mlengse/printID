@@ -1,37 +1,34 @@
 /**
  * BPJS CAPTCHA Solver using ONNX Runtime Web
  * 
- * Two-stage pipeline:
- * 1. bbox_detector.onnx - detects 5 character bounding boxes
- * 2. digit_model_0.onnx - recognizes each character (25 classes)
+ * CNN-CTC End-to-End approach:
+ * - Single model: captcha_ctc.onnx
+ * - Input: 200×50 grayscale image
+ * - Output: 5-character sequence with CTC greedy decoding
  */
 
-// BPJS character mapping (25 characters)
-const BPJS_CHARS = 'ABCDEHJKMNPRSTUVWXY345689';
+// BPJS character mapping (26 characters) - must match training order!
+const BPJS_CHARS = '3456789ABCDEHJKMNPRSTUVWXY';
+const BLANK_INDEX = 26; // CTC blank token
 
 // Model configuration
 const MODEL_CONFIG = {
   imageWidth: 200,
   imageHeight: 50,
-  digitWidth: 28,
-  digitHeight: 28,
-  numChars: 5,
-  numClasses: 25,
-  ensembleSize: 3  // Default: use 3 models for ensemble
+  numTimesteps: 50,  // Model outputs 50 timesteps
+  numClasses: 27     // 26 chars + 1 blank
 };
 
-// Global model sessions
-let bboxSession = null;
-let digitSessions = [];  // Array for ensemble
+// Global model session
+let ctcSession = null;
 let isInitialized = false;
 let initializationError = null;
 let currentSettings = {
-  modelPath: '',
-  useEnsemble: true
+  modelPath: ''
 };
 
 /**
- * Initialize ONNX Runtime and load models
+ * Initialize ONNX Runtime and load CTC model
  * @param {string} modelBasePath - Base path to model files (optional, uses settings if not provided)
  */
 async function initializeSolver(modelBasePath = null) {
@@ -41,7 +38,7 @@ async function initializeSolver(modelBasePath = null) {
   }
 
   try {
-    console.log('BPJS Solver: Initializing ONNX Runtime Web...');
+    console.log('BPJS Solver: Initializing ONNX Runtime Web (CTC mode)...');
     
     // Check if onnxruntime-web is available
     if (typeof ort === 'undefined') {
@@ -52,7 +49,7 @@ async function initializeSolver(modelBasePath = null) {
     if (typeof chrome !== 'undefined' && chrome.storage) {
       try {
         const items = await new Promise(resolve => {
-          chrome.storage.local.get({ modelPath: '', useEnsemble: true }, resolve);
+          chrome.storage.local.get({ modelPath: '' }, resolve);
         });
         currentSettings = items;
         console.log('BPJS Solver: Settings loaded:', currentSettings);
@@ -73,48 +70,25 @@ async function initializeSolver(modelBasePath = null) {
     // Configure ONNX Runtime - WASM files are in extension root
     ort.env.wasm.wasmPaths = extensionRoot;
     
-    // Load bbox detector model
-    const bboxModelPath = basePath + (basePath.endsWith('/') ? '' : '/') + 'bbox_detector.onnx';
-    console.log('BPJS Solver: Loading bbox detector...', bboxModelPath);
-    bboxSession = await ort.InferenceSession.create(bboxModelPath, {
+    // Load CTC model
+    const ctcModelPath = basePath + (basePath.endsWith('/') ? '' : '/') + 'captcha_ctc.onnx';
+    console.log('BPJS Solver: Loading CTC model...', ctcModelPath);
+    ctcSession = await ort.InferenceSession.create(ctcModelPath, {
       executionProviders: ['webgl', 'wasm']
     });
-    console.log('BPJS Solver: ✅ Bbox detector loaded');
-
-    // Load digit recognition models (ensemble)
-    const numModels = currentSettings.useEnsemble ? MODEL_CONFIG.ensembleSize : 1;
-    digitSessions = [];
-    
-    for (let i = 0; i < numModels; i++) {
-      const digitModelPath = basePath + (basePath.endsWith('/') ? '' : '/') + `digit_model_${i}.onnx`;
-      console.log(`BPJS Solver: Loading digit model ${i}...`, digitModelPath);
-      try {
-        const session = await ort.InferenceSession.create(digitModelPath, {
-          executionProviders: ['webgl', 'wasm']
-        });
-        digitSessions.push(session);
-        console.log(`BPJS Solver: ✅ Digit model ${i} loaded`);
-      } catch (e) {
-        console.warn(`BPJS Solver: ⚠️ Could not load digit_model_${i}.onnx:`, e.message);
-        if (i === 0) {
-          throw new Error('At least digit_model_0.onnx is required');
-        }
-      }
-    }
-
-    if (digitSessions.length === 0) {
-      throw new Error('No digit recognition models loaded');
-    }
+    console.log('BPJS Solver: ✅ CTC model loaded');
+    console.log('BPJS Solver: Input names:', ctcSession.inputNames);
+    console.log('BPJS Solver: Output names:', ctcSession.outputNames);
 
     isInitialized = true;
     initializationError = null;
-    console.log(`BPJS Solver: ✅ Initialization complete (${digitSessions.length} digit models loaded)`);
+    console.log('BPJS Solver: ✅ Initialization complete (CTC mode)');
     return true;
 
   } catch (error) {
     console.error('BPJS Solver: ❌ Initialization failed:', error);
-    initializationError = error.message;
-    notifyUser('error', `CAPTCHA Solver gagal dimuat: ${error.message}`);
+    initializationError = (error && error.message) ? error.message : String(error);
+    notifyUser('error', 'CAPTCHA Solver gagal dimuat: ' + initializationError);
     return false;
   }
 }
@@ -173,29 +147,27 @@ function notifyUser(type, message) {
 /**
  * Convert image element to grayscale tensor
  * @param {HTMLImageElement|HTMLCanvasElement} imageElement
- * @param {number} targetWidth
- * @param {number} targetHeight
  * @returns {Float32Array}
  */
-function imageToTensor(imageElement, targetWidth, targetHeight) {
+function imageToTensor(imageElement) {
   // Create canvas for image processing
   const canvas = document.createElement('canvas');
-  canvas.width = targetWidth;
-  canvas.height = targetHeight;
+  canvas.width = MODEL_CONFIG.imageWidth;
+  canvas.height = MODEL_CONFIG.imageHeight;
   const ctx = canvas.getContext('2d');
 
   // Draw and resize image
-  ctx.drawImage(imageElement, 0, 0, targetWidth, targetHeight);
+  ctx.drawImage(imageElement, 0, 0, MODEL_CONFIG.imageWidth, MODEL_CONFIG.imageHeight);
   
   // Get image data
-  const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
+  const imageData = ctx.getImageData(0, 0, MODEL_CONFIG.imageWidth, MODEL_CONFIG.imageHeight);
   const data = imageData.data;
 
   // Convert to grayscale and normalize [0, 1]
   // NHWC format: [1, height, width, 1]
-  const tensorData = new Float32Array(targetHeight * targetWidth);
+  const tensorData = new Float32Array(MODEL_CONFIG.imageHeight * MODEL_CONFIG.imageWidth);
   
-  for (let i = 0; i < targetHeight * targetWidth; i++) {
+  for (let i = 0; i < MODEL_CONFIG.imageHeight * MODEL_CONFIG.imageWidth; i++) {
     const r = data[i * 4];
     const g = data[i * 4 + 1];
     const b = data[i * 4 + 2];
@@ -208,132 +180,73 @@ function imageToTensor(imageElement, targetWidth, targetHeight) {
 }
 
 /**
- * Run bounding box detection
- * @param {Float32Array} imageTensor
- * @returns {Float32Array} - 20 values (5 boxes × 4 coords)
+ * CTC Greedy Decoding
+ * Removes blanks and repeated characters
+ * @param {Float32Array} logits - Output logits [timesteps, num_classes]
+ * @returns {string} - Decoded text
  */
-async function detectBboxes(imageTensor) {
-  if (!bboxSession) {
-    throw new Error('Bbox detector not initialized');
+function ctcGreedyDecode(logits) {
+  const numTimesteps = MODEL_CONFIG.numTimesteps;
+  const numClasses = MODEL_CONFIG.numClasses;
+  
+  const decoded = [];
+  let prevIndex = -1;
+  
+  for (let t = 0; t < numTimesteps; t++) {
+    // Find argmax for this timestep
+    let maxIdx = 0;
+    let maxVal = logits[t * numClasses];
+    
+    for (let c = 1; c < numClasses; c++) {
+      const val = logits[t * numClasses + c];
+      if (val > maxVal) {
+        maxVal = val;
+        maxIdx = c;
+      }
+    }
+    
+    // CTC decoding: skip blanks and repeated chars
+    if (maxIdx !== BLANK_INDEX && maxIdx !== prevIndex) {
+      decoded.push(maxIdx);
+    }
+    prevIndex = maxIdx;
+  }
+  
+  // Convert indices to characters
+  return decoded.map(idx => {
+    if (idx >= 0 && idx < BPJS_CHARS.length) {
+      return BPJS_CHARS[idx];
+    }
+    return '?';
+  }).join('');
+}
+
+/**
+ * Run CTC model inference
+ * @param {Float32Array} imageTensor
+ * @returns {string} - Predicted text
+ */
+async function runCTCInference(imageTensor) {
+  if (!ctcSession) {
+    throw new Error('CTC model not initialized');
   }
 
   // Create input tensor [1, 50, 200, 1] - NHWC format
-  const inputTensor = new ort.Tensor('float32', imageTensor, [1, MODEL_CONFIG.imageHeight, MODEL_CONFIG.imageWidth, 1]);
+  const inputTensor = new ort.Tensor('float32', imageTensor, 
+    [1, MODEL_CONFIG.imageHeight, MODEL_CONFIG.imageWidth, 1]);
 
   // Run inference
   const feeds = {};
-  feeds[bboxSession.inputNames[0]] = inputTensor;
+  feeds[ctcSession.inputNames[0]] = inputTensor;
   
-  const results = await bboxSession.run(feeds);
-  const output = results[bboxSession.outputNames[0]];
-
-  return output.data;
-}
-
-/**
- * Extract character region from image
- * @param {HTMLImageElement|HTMLCanvasElement} image
- * @param {number} x - normalized x coordinate
- * @param {number} y - normalized y coordinate  
- * @param {number} w - normalized width
- * @param {number} h - normalized height
- * @returns {Float32Array}
- */
-function extractCharRegion(image, x, y, w, h) {
-  const canvas = document.createElement('canvas');
-  canvas.width = MODEL_CONFIG.digitWidth;
-  canvas.height = MODEL_CONFIG.digitHeight;
-  const ctx = canvas.getContext('2d');
-
-  // Denormalize coordinates
-  const imgWidth = image.width || image.naturalWidth;
-  const imgHeight = image.height || image.naturalHeight;
+  const results = await ctcSession.run(feeds);
+  const output = results[ctcSession.outputNames[0]];
   
-  const sx = Math.max(0, x * imgWidth);
-  const sy = Math.max(0, y * imgHeight);
-  const sw = Math.min(imgWidth - sx, w * imgWidth);
-  const sh = Math.min(imgHeight - sy, h * imgHeight);
-
-  // Draw cropped region
-  ctx.drawImage(image, sx, sy, sw, sh, 0, 0, MODEL_CONFIG.digitWidth, MODEL_CONFIG.digitHeight);
-
-  // Convert to tensor
-  const imageData = ctx.getImageData(0, 0, MODEL_CONFIG.digitWidth, MODEL_CONFIG.digitHeight);
-  const data = imageData.data;
-  const tensorData = new Float32Array(MODEL_CONFIG.digitHeight * MODEL_CONFIG.digitWidth);
-
-  for (let i = 0; i < tensorData.length; i++) {
-    const r = data[i * 4];
-    const g = data[i * 4 + 1];
-    const b = data[i * 4 + 2];
-    tensorData[i] = (0.299 * r + 0.587 * g + 0.114 * b) / 255.0;
-  }
-
-  return tensorData;
-}
-
-/**
- * Recognize single character using ensemble voting
- * @param {Float32Array} charTensor
- * @returns {number} - predicted class index
- */
-async function recognizeChar(charTensor) {
-  if (digitSessions.length === 0) {
-    throw new Error('Digit recognizer not initialized');
-  }
-
-  // Create input tensor [1, 28, 28, 1] - NHWC format
-  const inputTensor = new ort.Tensor('float32', charTensor, [1, MODEL_CONFIG.digitHeight, MODEL_CONFIG.digitWidth, 1]);
-
-  // Collect votes from all models
-  const votes = new Map();
+  // Output shape should be [1, 50, 27] - batch, timesteps, classes
+  const logits = output.data;
   
-  for (let i = 0; i < digitSessions.length; i++) {
-    const session = digitSessions[i];
-    const feeds = {};
-    feeds[session.inputNames[0]] = inputTensor;
-    
-    const results = await session.run(feeds);
-    const output = results[session.outputNames[0]];
-    const probs = output.data;
-
-    // Find argmax for this model
-    let maxIdx = 0;
-    let maxVal = probs[0];
-    for (let j = 1; j < probs.length; j++) {
-      if (probs[j] > maxVal) {
-        maxVal = probs[j];
-        maxIdx = j;
-      }
-    }
-
-    // Add vote
-    votes.set(maxIdx, (votes.get(maxIdx) || 0) + 1);
-  }
-
-  // Find class with most votes
-  let bestClass = 0;
-  let maxVotes = 0;
-  for (const [classIdx, voteCount] of votes.entries()) {
-    if (voteCount > maxVotes) {
-      maxVotes = voteCount;
-      bestClass = classIdx;
-    }
-  }
-
-  return bestClass;
-}
-
-/**
- * Convert class index to character
- * @param {number} index
- * @returns {string}
- */
-function indexToChar(index) {
-  if (index >= 0 && index < BPJS_CHARS.length) {
-    return BPJS_CHARS[index];
-  }
-  return '?';
+  // Apply CTC greedy decoding
+  return ctcGreedyDecode(logits);
 }
 
 /**
@@ -346,42 +259,16 @@ async function solveCaptcha(imageElement) {
     throw new Error('Solver not initialized. Call initializeSolver() first.');
   }
 
-  console.log('BPJS Solver: Starting CAPTCHA prediction...');
+  console.log('BPJS Solver: Starting CTC CAPTCHA prediction...');
 
   try {
-    // Step 1: Preprocess image for bbox detection
-    const imageTensor = imageToTensor(imageElement, MODEL_CONFIG.imageWidth, MODEL_CONFIG.imageHeight);
+    // Step 1: Preprocess image
+    const imageTensor = imageToTensor(imageElement);
 
-    // Step 2: Detect bounding boxes
-    console.log('BPJS Solver: Detecting bounding boxes...');
-    const bboxes = await detectBboxes(imageTensor);
+    // Step 2: Run CTC inference with greedy decoding
+    console.log('BPJS Solver: Running CTC inference...');
+    const result = await runCTCInference(imageTensor);
     
-    if (bboxes.length !== MODEL_CONFIG.numChars * 4) {
-      throw new Error(`Invalid bbox output: expected ${MODEL_CONFIG.numChars * 4}, got ${bboxes.length}`);
-    }
-
-    // Step 3: Extract and recognize each character
-    console.log('BPJS Solver: Recognizing characters...');
-    let result = '';
-    
-    for (let i = 0; i < MODEL_CONFIG.numChars; i++) {
-      const idx = i * 4;
-      const x = bboxes[idx];
-      const y = bboxes[idx + 1];
-      const w = bboxes[idx + 2];
-      const h = bboxes[idx + 3];
-
-      // Extract character region
-      const charTensor = extractCharRegion(imageElement, x, y, w, h);
-
-      // Recognize character
-      const classIdx = await recognizeChar(charTensor);
-      const char = indexToChar(classIdx);
-      result += char;
-
-      console.log(`BPJS Solver: Char ${i + 1}: ${char}`);
-    }
-
     console.log('BPJS Solver: ✅ Prediction:', result);
     return result;
 
@@ -437,8 +324,8 @@ if (typeof window !== 'undefined') {
     solveFromBase64: solveCaptchaFromBase64,
     isReady: () => isInitialized,
     getError: () => initializationError,
-    getEnsembleSize: () => digitSessions.length,
     notifyUser: notifyUser,
-    CHARS: BPJS_CHARS
+    CHARS: BPJS_CHARS,
+    BLANK_INDEX: BLANK_INDEX
   };
 }
