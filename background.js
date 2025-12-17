@@ -45,14 +45,54 @@ chrome.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
       }
     });
     
-    // Inject autofill script to BPJS skrining website
+    // Inject CAPTCHA solver scripts to BPJS skrining website
     if (tab.url && (tab.url.startsWith('https://webskrining.bpjs-kesehatan.go.id/skrining') || tab.url.includes('webskrining.bpjs-kesehatan.go.id'))) {
-      chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        files: ['domHelpers.js', 'bpjs_skrining_autofill.js']
-      // }).then(() => {
-        // console.log('BPJS skrining autofill script injected successfully');
-      }).catch(err => console.error('Failed to execute BPJS skrining autofill script:', err));
+      const extensionUrl = chrome.runtime.getURL('');
+      
+      // Get skrining data from storage
+      chrome.storage.local.get(['bpjs-skrining-data'], (result) => {
+        const skriningData = result['bpjs-skrining-data'] || null;
+        console.log('Skrining data from storage:', skriningData);
+        
+        // First, inject the extension URL and skrining data as global variables
+        chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          func: (url, data) => {
+            window.__BPJS_EXTENSION_URL__ = url;
+            window.__BPJS_SKRINING_DATA__ = data;
+            console.log('BPJS Extension URL set:', url);
+            console.log('BPJS Skrining Data set:', data);
+          },
+          args: [extensionUrl, skriningData],
+          world: 'MAIN'
+        }).then(() => {
+        console.log('Extension URL injected, now injecting ONNX Runtime...');
+        // Then inject ONNX Runtime into MAIN world
+        return chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: ['ort.min.js'],
+          world: 'MAIN'
+        });
+      }).then(() => {
+        console.log('ONNX Runtime injected, now injecting solver...');
+        // Then inject solver
+        return chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: ['bpjs_captcha_solver.js'],
+          world: 'MAIN'
+        });
+      }).then(() => {
+        console.log('Solver injected, now injecting autofill...');
+        // Finally inject autofill
+        return chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: ['bpjs_skrining_autofill_page.js'],
+          world: 'MAIN'
+        });
+      }).then(() => {
+        console.log('All BPJS CAPTCHA solver scripts injected successfully');
+      }).catch(err => console.error('Failed to execute BPJS solver scripts:', err));
+      }); // Close chrome.storage.local.get callback
     }
   }
 });
