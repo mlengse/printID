@@ -23,19 +23,14 @@ Ekstensi Chrome ini dirancang untuk membantu mencetak label identitas pasien dan
 > [!IMPORTANT]
 > File model ONNX tidak disertakan dalam repository. Hubungi admin untuk mendapatkan file model.
 
-Untuk mengaktifkan fitur Auto-Fill CAPTCHA, Anda memerlukan file tambahan:
+Untuk mengaktifkan fitur Auto-Fill CAPTCHA, Anda memerlukan file model:
 
-1.  **ONNX Runtime Web** - Unduh dari [ONNX Runtime Releases](https://github.com/microsoft/onnxruntime/releases):
-    - `ort.min.js`
-    - `ort-wasm-simd-threaded.wasm`
-    - `ort-wasm-simd-threaded.jsep.wasm`
-    - `ort-wasm-simd-threaded.jsep.mjs`
-    
-2.  **Model CAPTCHA** - Hubungi admin untuk mendapatkan:
+1.  **Model CAPTCHA** - Hubungi admin untuk mendapatkan:
     - `captcha-model/captcha_ctc.onnx` - Model CNN-CTC
     - `captcha-model/config.json` - Konfigurasi model
 
-3.  Copy semua file ke folder ekstensi.
+2.  Copy file ke folder `captcha-model/` di dalam folder ekstensi.
+
 
 ## Konfigurasi Ekstensi
 

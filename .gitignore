@@ -1,10 +1,8 @@
 # Ignore ONNX models (contact admin for model files)
-captcha-model/
-
-# ONNX Runtime Web files (download separately)
-ort*.js
-ort*.mjs
-ort*.wasm
+captcha-model/*.onnx
+captcha-model/*.keras
+captcha-model/*.json
+!captcha-model/.gitkeep
 
 # TensorFlow.js (deprecated)
 tf*.js

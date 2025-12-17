@@ -1,0 +1,7 @@
+# Folder untuk file model CAPTCHA
+
+Letakkan file model di sini:
+- captcha_ctc.onnx - Model CNN-CTC ONNX
+- config.json - Konfigurasi model
+
+> Hubungi admin untuk mendapatkan file model.
