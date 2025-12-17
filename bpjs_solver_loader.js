@@ -1,6 +1,6 @@
 /**
  * BPJS CAPTCHA Solver Loader
- * Injects ONNX Runtime, solver, and autofill scripts into page context
+ * Injects TensorFlow.js, solver, and autofill scripts into page context
  */
 
 (function() {
@@ -36,23 +36,23 @@
   // Main loader
   async function loadSolver() {
     try {
-      // Inject ONNX Runtime Web
-      const ortUrl = getExtensionUrl('ort.min.js');
-      console.log('BPJS Solver Loader: Injecting ONNX Runtime from', ortUrl);
-      await injectScript(ortUrl);
+      // Inject TensorFlow.js
+      const tfUrl = getExtensionUrl('tf.min.js');
+      console.log('BPJS Solver Loader: Injecting TensorFlow.js from', tfUrl);
+      await injectScript(tfUrl);
 
-      // Wait for ort to be available
+      // Wait for tf to be available
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Check if ort is available
-      if (typeof window.ort === 'undefined') {
-        throw new Error('ONNX Runtime not available after injection');
+      // Check if tf is available
+      if (typeof window.tf === 'undefined') {
+        throw new Error('TensorFlow.js not available after injection');
       }
 
-      console.log('BPJS Solver Loader: ONNX Runtime available');
+      console.log('BPJS Solver Loader: TensorFlow.js available, version:', window.tf.version.tfjs);
 
-      // Inject solver script
-      const solverUrl = getExtensionUrl('bpjs_captcha_solver.js');
+      // Inject solver script (TensorFlow.js version)
+      const solverUrl = getExtensionUrl('bpjs_captcha_solver_tfjs.js');
       console.log('BPJS Solver Loader: Injecting solver from', solverUrl);
       await injectScript(solverUrl);
 
@@ -84,3 +84,4 @@
     loadSolver();
   }
 })();
+

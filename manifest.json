@@ -28,10 +28,9 @@
       "resources": [
         "print_16x16.png", 
         "drug_16x16.png",
-        "captcha-model/*.onnx",
-        "ort.min.js",
-        "ort-wasm*.wasm",
-        "ort-wasm*.mjs",
+        "captcha-model/*",
+        "tf.min.js",
+        "bpjs_captcha_solver_tfjs.js",
         "bpjs_captcha_solver.js",
         "bpjs_skrining_autofill_page.js"
       ],
