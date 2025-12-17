@@ -1,9 +1,16 @@
-# Ignore ONNX models (user must copy manually)
+# Ignore ONNX models (contact admin for model files)
 captcha-model/
 
-# ONNX Runtime Web files
+# ONNX Runtime Web files (download separately)
 ort*.js
+ort*.mjs
 ort*.wasm
 
-# Node modules (if any)
+# TensorFlow.js (deprecated)
+tf*.js
+
+# Node modules
 node_modules/
+
+# Keras models (not needed for runtime)
+*.keras
