@@ -1,12 +1,13 @@
 # Ekstensi Chrome Print ID Pasien
 
-Ekstensi Chrome ini dirancang untuk membantu mencetak label identitas pasien dan label obat dari sistem j-care.
+Ekstensi Chrome ini dirancang untuk membantu mencetak label identitas pasien dan label obat dari sistem j-care, serta menyediakan fitur **Auto-Fill CAPTCHA** untuk halaman skrining BPJS.
 
 ## Fitur
 
 *   Mencetak label identitas pasien dengan informasi yang diambil dari halaman registrasi j-care.
 *   Mencetak label obat dengan informasi dari halaman rekap pemakaian obat di j-care.
 *   Menggunakan barcode Code 128 untuk Nomor Rekam Medis (RM) pada label.
+*   **Auto-Fill CAPTCHA** - Mengisi CAPTCHA secara otomatis pada halaman skrining BPJS menggunakan model CNN-CTC ONNX.
 
 ## Instalasi
 
@@ -17,77 +18,98 @@ Ekstensi Chrome ini dirancang untuk membantu mencetak label identitas pasien dan
 5.  Klik "Muat yang belum dibuka" (Load unpacked).
 6.  Pilih folder tempat Anda mengekstrak file ekstensi.
 
+### Setup CAPTCHA Solver
+
+> [!IMPORTANT]
+> File model ONNX tidak disertakan dalam repository. Hubungi admin untuk mendapatkan file model.
+
+Untuk mengaktifkan fitur Auto-Fill CAPTCHA, Anda memerlukan file tambahan:
+
+1.  **ONNX Runtime Web** - Unduh dari [ONNX Runtime Releases](https://github.com/microsoft/onnxruntime/releases):
+    - `ort.min.js`
+    - `ort-wasm-simd-threaded.wasm`
+    - `ort-wasm-simd-threaded.jsep.wasm`
+    - `ort-wasm-simd-threaded.jsep.mjs`
+    
+2.  **Model CAPTCHA** - Hubungi admin untuk mendapatkan:
+    - `captcha-model/captcha_ctc.onnx` - Model CNN-CTC
+    - `captcha-model/config.json` - Konfigurasi model
+
+3.  Copy semua file ke folder ekstensi.
+
 ## Konfigurasi Ekstensi
 
 Sebelum menggunakan ekstensi, Anda perlu mengaturnya terlebih dahulu:
 
 1.  Klik kanan pada ikon ekstensi di toolbar Chrome.
-2.  Pilih "Opsi" (Options). (Jika Anda tidak melihat menu "Opsi", Anda mungkin perlu mengklik ikon "Ekstensi" (puzzle) terlebih dahulu, lalu klik tiga titik di sebelah nama ekstensi ini, kemudian pilih "Opsi".)
+2.  Pilih "Opsi" (Options).
 3.  Di halaman opsi:
-    *   **URL j-care**: Masukkan alamat URL dasar dari sistem j-care Anda (Contoh: `http://192.168.100.178/j-care/`). Pastikan diakhiri dengan `/` dan path yang benar sebelum bagian `/visits` atau `/healthcenters/rekap_pemakaian_obat`.
-    *   **Nama Puskesmas**: Masukkan nama Puskesmas yang akan ditampilkan pada label (Contoh: `PKM Jayengan`).
+    *   **URL j-care**: Masukkan alamat URL dasar dari sistem j-care Anda (Contoh: `http://192.168.100.178/j-care/`).
+    *   **Nama Puskesmas**: Masukkan nama Puskesmas yang akan ditampilkan pada label.
 4.  Klik "Simpan".
 
 ## Cara Penggunaan
 
-Setelah ekstensi dikonfigurasi dengan benar:
-
 ### Mencetak Label Identitas Pasien
 
-1.  Pastikan Anda berada di halaman registrasi pasien atau halaman detail pasien di sistem j-care Anda (URL harus diawali dengan URL j-care yang Anda konfigurasikan dan mengandung path yang biasanya berakhiran `/visits`).
-2.  Sebuah tombol "Cetak Label" akan muncul di halaman tersebut jika URL cocok.
-3.  Klik tombol "Cetak Label" untuk menghasilkan PDF label identitas pasien.
-4.  PDF akan ditampilkan dalam iframe tersembunyi dan siap untuk dicetak.
+1.  Pastikan Anda berada di halaman registrasi pasien di sistem j-care Anda (path mengandung `/visits`).
+2.  Klik tombol "Cetak Label" yang muncul.
+3.  PDF label akan siap untuk dicetak.
 
 ### Mencetak Label Obat
 
-1.  Pastikan Anda berada di halaman rekap pemakaian obat di sistem j-care Anda (URL harus diawali dengan URL j-care yang Anda konfigurasikan dan mengandung path yang biasanya adalah `/healthcenters/rekap_pemakaian_obat`).
-2.  Ikon print akan muncul di setiap baris item obat jika URL cocok.
-3.  Klik ikon print pada baris obat yang diinginkan untuk menghasilkan PDF label obat.
-4.  PDF akan ditampilkan dalam iframe tersembunyi dan siap untuk dicetak.
+1.  Pastikan Anda berada di halaman rekap pemakaian obat (`/healthcenters/rekap_pemakaian_obat`).
+2.  Klik ikon print pada baris obat yang diinginkan.
 
 ### Skrining Kesehatan BPJS Otomatis
 
-1.  Ketika Anda membuka halaman detail BPJS (`/j-care/bpjs/apis/detail/`) yang menampilkan pesan "Anda belum melakukan skrining kesehatan", ekstensi akan secara otomatis:
-    *   Menampilkan loading indicator dengan progress status
-    *   Mengambil nomor kartu BPJS dari halaman
-    *   Melakukan verifikasi data pasien BPJS
-    *   Membuka halaman skrining BPJS (https://webskrining.bpjs-kesehatan.go.id/skrining) di window baru
-    *   Mengisi form skrining secara otomatis dengan NIK dan tanggal lahir dari data verifikasi
-2.  Anda tinggal melanjutkan proses skrining di halaman yang sudah terbuka.
-3.  Data skrining akan otomatis dihapus setelah digunakan untuk keamanan.
+1.  Ketika Anda membuka halaman detail BPJS yang menampilkan pesan "Anda belum melakukan skrining kesehatan", ekstensi akan:
+    *   Membuka halaman skrining BPJS otomatis
+    *   Mengisi NIK dan tanggal lahir
+    *   **Mengisi CAPTCHA secara otomatis**
+    *   Klik "Cari Peserta" secara otomatis
+    *   Klik tombol "Setuju" secara otomatis
+2.  Anda tinggal melanjutkan menjawab pertanyaan skrining.
 
 ## Catatan Penting
-*   Pastikan URL j-care yang Anda masukkan di halaman opsi adalah benar dan lengkap agar ekstensi dapat berfungsi. Perhatikan contoh format yang diberikan.
-*   Untuk label identitas pasien, nama Puskesmas yang tercetak akan sesuai dengan yang Anda masukkan di halaman opsi. Jika Anda mengalami masalah dimana nama Puskesmas kembali ke nama default ("PKM Default"), coba simpan ulang pengaturan di halaman Opsi dan segarkan halaman j-care.
-*   Untuk fitur skrining BPJS otomatis, pastikan popup blocker tidak menghalangi window baru. Jika popup diblokir, ekstensi akan otomatis mencoba membuka di tab baru.
-*   Data verifikasi BPJS disimpan sementara di chrome.storage dan akan otomatis dihapus setelah digunakan atau setelah 5 menit untuk keamanan.
+
+*   Pastikan URL j-care yang Anda masukkan adalah benar dan lengkap.
+*   Untuk fitur skrining BPJS, pastikan popup blocker tidak menghalangi window baru.
+*   File model CAPTCHA tidak disertakan di repository - **hubungi admin untuk mendapatkan file model**.
 
 ## Keamanan & Best Practices
 
 ### Host Permissions
-Ekstensi ini saat ini meminta izin untuk mengakses semua website (`http://*/*` dan `https://*/*`). Untuk keamanan yang lebih baik:
-
-1. **Untuk Pengguna:** Pastikan Anda hanya menggunakan ekstensi ini di sistem j-care internal yang terpercaya.
-2. **Untuk Developer:** Sebaiknya ubah `host_permissions` di `manifest.json` untuk hanya mencakup URL spesifik sistem j-care Anda. Contoh:
-   ```json
-   "host_permissions": [
-     "http://192.168.100.178/*",
-     "http://localhost:3000/*"
-   ]
-   ```
+Ekstensi ini meminta izin akses luas. Untuk keamanan lebih baik, ubah `host_permissions` di `manifest.json` untuk URL spesifik:
+```json
+"host_permissions": [
+  "http://192.168.100.178/*",
+  "https://webskrining.bpjs-kesehatan.go.id/*"
+]
+```
 
 ### Development
-Proyek ini sudah dilengkapi dengan tooling modern:
-- **ESLint** untuk static code analysis
-- **Prettier** untuk code formatting
-
-Untuk menggunakan:
 ```bash
 npm install
 npm run lint        # Check for code issues
 npm run lint:fix    # Auto-fix code issues
 npm run format      # Format all files
+```
+
+## Mendapatkan File Model
+
+> [!NOTE]
+> File model CAPTCHA (`captcha_ctc.onnx`) tidak di-push ke repository GitHub karena ukurannya yang besar (~30MB). 
+
+Untuk mendapatkan file model:
+1.  Hubungi admin/developer
+2.  Atau train model sendiri menggunakan notebook di folder `trainer/` (jika tersedia)
+
+Struktur folder `captcha-model/` yang diperlukan:
+```
+captcha-model/
+├── captcha_ctc.onnx   # Model ONNX untuk CAPTCHA
+└── config.json        # Konfigurasi karakter dan dimensi
 ```
 
 ## Lisensi
