@@ -1,24 +1,24 @@
 /**
- * BPJS Skrining AutoFill - Page Context Version
- * This script runs in page context (injected by loader) and can access BPJSCaptchaSolver directly
+ * Health Screening AutoFill - Page Context Version
+ * This script runs in page context (injected by loader) and can access CaptchaSolver directly
  */
 
 (function() {
   'use strict';
 
-  console.log('BPJS AutoFill (Page): Script dimuat');
+  console.log('AutoFill (Page): Script dimuat');
 
-  // Check for skrining data passed via global variable
-  const skriningData = window.__BPJS_SKRINING_DATA__;
+  // Check for screening data passed via global variable
+  const screeningData = window.__HEALTH_SCREENING_DATA__;
   
   // Fill form with NIK and Tanggal Lahir if data available
   function fillForm() {
-    if (!skriningData) {
-      console.log('BPJS AutoFill (Page): No skrining data available');
+    if (!screeningData) {
+      console.log('AutoFill (Page): No data available');
       return;
     }
 
-    console.log('BPJS AutoFill (Page): Data tersedia, mengisi form...');
+    console.log('AutoFill (Page): Data tersedia, mengisi form...');
 
     // Wait for form elements
     let attempts = 0;
@@ -33,41 +33,41 @@
         clearInterval(checkForm);
 
         // Fill NIK
-        if (skriningData.nik) {
-          nikInput.value = skriningData.nik;
+        if (screeningData.nik) {
+          nikInput.value = screeningData.nik;
           nikInput.dispatchEvent(new Event('input', { bubbles: true }));
           nikInput.dispatchEvent(new Event('change', { bubbles: true }));
-          console.log('BPJS AutoFill (Page): NIK terisi:', skriningData.nik);
+          console.log('AutoFill (Page): NIK terisi');
         }
 
         // Fill Tanggal Lahir
-        if (skriningData.tglLahir) {
-          tglLahirInput.value = skriningData.tglLahir;
+        if (screeningData.tglLahir) {
+          tglLahirInput.value = screeningData.tglLahir;
           tglLahirInput.dispatchEvent(new Event('input', { bubbles: true }));
           tglLahirInput.dispatchEvent(new Event('change', { bubbles: true }));
-          console.log('BPJS AutoFill (Page): Tanggal Lahir terisi:', skriningData.tglLahir);
+          console.log('AutoFill (Page): Tanggal Lahir terisi');
         }
 
-        console.log('BPJS AutoFill (Page): Form berhasil diisi!');
+        console.log('AutoFill (Page): Form berhasil diisi!');
 
       } else if (attempts >= maxAttempts) {
         clearInterval(checkForm);
-        console.error('BPJS AutoFill (Page): Form elements tidak ditemukan');
+        console.error('AutoFill (Page): Form elements tidak ditemukan');
       }
     }, 500);
   }
 
   // Direct access to solver in page context
-  const solver = window.BPJSCaptchaSolver;
+  const solver = window.CaptchaSolver;
 
   if (!solver) {
-    console.error('BPJS AutoFill (Page): Solver tidak tersedia!');
+    console.error('AutoFill (Page): Solver tidak tersedia!');
     // Still try to fill form even without solver
     fillForm();
     return;
   }
 
-  console.log('BPJS AutoFill (Page): Solver tersedia, memulai autofill...');
+  console.log('AutoFill (Page): Solver tersedia, memulai autofill...');
   
   // Flag to stop solving after success
   let captchaSolved = false;
@@ -80,10 +80,10 @@
   async function solveCaptcha() {
     // Skip if already solved
     if (captchaSolved) {
-      console.log('BPJS AutoFill (Page): CAPTCHA already solved, skipping...');
+      console.log('AutoFill (Page): CAPTCHA already solved, skipping...');
       return;
     }
-    console.log('BPJS AutoFill (Page): Mencari CAPTCHA elements...');
+    console.log('AutoFill (Page): Mencari CAPTCHA elements...');
 
     // Wait for elements with retry
     let attempts = 0;
@@ -95,7 +95,7 @@
       const captchaImg = document.querySelector('#AppCaptcha_CaptchaImage');
       const captchaInput = document.querySelector('#captchaCode_txt');
 
-      console.log(`BPJS AutoFill (Page): Attempt ${attempts}/${maxAttempts}`, {
+      console.log(`AutoFill (Page): Attempt ${attempts}/${maxAttempts}`, {
         imgFound: !!captchaImg,
         inputFound: !!captchaInput
       });
@@ -103,26 +103,26 @@
       if (captchaImg && captchaInput) {
         clearInterval(checkCaptcha);
 
-        console.log('BPJS AutoFill (Page): CAPTCHA elements ditemukan!');
+        console.log('AutoFill (Page): CAPTCHA elements ditemukan!');
 
         try {
           // Initialize solver if needed
           if (!solver.isReady()) {
-            console.log('BPJS AutoFill (Page): Initializing solver...');
+            console.log('AutoFill (Page): Initializing solver...');
             const success = await solver.initialize();
             if (!success) {
-              console.error('BPJS AutoFill (Page): Gagal initialize solver');
+              console.error('AutoFill (Page): Gagal initialize solver');
               return;
             }
           }
 
           // Solve CAPTCHA
-          console.log('BPJS AutoFill (Page): Solving CAPTCHA...');
+          console.log('AutoFill (Page): Solving CAPTCHA...');
           const prediction = await solver.solve(captchaImg);
 
           if (prediction && prediction.length === 5) {
             // Simulate human-like typing with full keyboard events
-            console.log('BPJS AutoFill (Page): Typing CAPTCHA with keyboard events...');
+            console.log('AutoFill (Page): Typing CAPTCHA with keyboard events...');
             captchaInput.focus();
             captchaInput.value = '';
             
@@ -176,14 +176,14 @@
               } else {
                 // Done typing - dispatch change
                 captchaInput.dispatchEvent(new Event('change', { bubbles: true }));
-                console.log('BPJS AutoFill (Page): ✅ CAPTCHA solved:', prediction);
+                console.log('AutoFill (Page): ✅ CAPTCHA solved:', prediction);
                 showNotification('success', 'CAPTCHA berhasil di-solve: ' + prediction);
                 
                 // Wait a bit then simulate Tab + Enter to click button
                 setTimeout(() => {
                   const btn = document.querySelector('#btnCariPetugas');
                   if (btn) {
-                    console.log('BPJS AutoFill (Page): Focusing button and pressing Enter...');
+                    console.log('AutoFill (Page): Focusing button and pressing Enter...');
                     btn.focus();
                     
                     // Simulate Enter keydown on button
@@ -212,7 +212,7 @@
                     captchaSolved = true;
                     if (captchaObserver) {
                       captchaObserver.disconnect();
-                      console.log('BPJS AutoFill (Page): Observer disconnected');
+                      console.log('AutoFill (Page): Observer disconnected');
                     }
                     
                     // Watch for Setuju button
@@ -223,28 +223,28 @@
             };
             typeChar();
           } else {
-            console.warn('BPJS AutoFill (Page): Invalid prediction:', prediction);
+            console.warn('AutoFill (Page): Invalid prediction:', prediction);
             showNotification('warning', 'CAPTCHA prediction invalid');
           }
 
         } catch (error) {
-          console.error('BPJS AutoFill (Page): Error solving CAPTCHA:', error);
+          console.error('AutoFill (Page): Error solving CAPTCHA:', error);
           showNotification('error', 'Error: ' + error.message);
         }
 
       } else if (attempts >= maxAttempts) {
         clearInterval(checkCaptcha);
-        console.log('BPJS AutoFill (Page): CAPTCHA elements tidak ditemukan setelah 15 detik');
+        console.log('AutoFill (Page): CAPTCHA elements tidak ditemukan setelah 15 detik');
       }
     }, 500);
   }
 
   // Show notification
   function showNotification(type, message) {
-    let notif = document.getElementById('bpjs-solver-notif');
+    let notif = document.getElementById('solver-notif');
     if (!notif) {
       notif = document.createElement('div');
-      notif.id = 'bpjs-solver-notif';
+      notif.id = 'solver-notif';
       notif.style.cssText = `
         position: fixed;
         top: 10px;
@@ -280,7 +280,7 @@
 
   // Function to watch for and click Setuju button OR handle error modal
   function watchForSetujuButton() {
-    console.log('BPJS AutoFill (Page): Watching for Setuju button or error modal...');
+    console.log('AutoFill (Page): Watching for Setuju button or error modal...');
     
     const checkInterval = setInterval(() => {
       // Check for Setuju button
@@ -288,7 +288,7 @@
       for (const btn of buttons) {
         const text = btn.textContent || btn.value || '';
         if (text.toLowerCase().includes('setuju')) {
-          console.log('BPJS AutoFill (Page): Found Setuju button:', text);
+          console.log('AutoFill (Page): Found Setuju button:', text);
           clearInterval(checkInterval);
           
           // Click with delay
@@ -296,7 +296,7 @@
             btn.focus();
             btn.click();
             showNotification('success', 'Klik Setuju...');
-            console.log('BPJS AutoFill (Page): Clicked Setuju button');
+            console.log('AutoFill (Page): Clicked Setuju button');
           }, 500);
           return;
         }
@@ -309,7 +309,7 @@
         const modalText = modal.textContent || '';
         if (modalText.toLowerCase().includes('captcha') && 
             (modalText.toLowerCase().includes('salah') || modalText.toLowerCase().includes('wrong'))) {
-          console.log('BPJS AutoFill (Page): Error modal detected - CAPTCHA salah');
+          console.log('AutoFill (Page): Error modal detected - CAPTCHA salah');
           clearInterval(checkInterval);
           
           // Find and click OK button in modal
@@ -319,7 +319,7 @@
             if (btnText.toLowerCase().includes('ok') || 
                 btnText.toLowerCase().includes('tutup') ||
                 btnText.toLowerCase().includes('close')) {
-              console.log('BPJS AutoFill (Page): Clicking OK button...');
+              console.log('AutoFill (Page): Clicking OK button...');
               okBtn.click();
               break;
             }
@@ -334,7 +334,7 @@
             
             if (captchaObserver) {
               captchaObserver.observe(document.body, { childList: true, subtree: true });
-              console.log('BPJS AutoFill (Page): Observer re-enabled');
+              console.log('AutoFill (Page): Observer re-enabled');
             }
             
             // Try solving again
@@ -350,7 +350,7 @@
         const titleText = swalTitle.textContent || '';
         if (titleText.toLowerCase().includes('captcha') && 
             (titleText.toLowerCase().includes('salah') || titleText.toLowerCase().includes('wrong'))) {
-          console.log('BPJS AutoFill (Page): SweetAlert error detected');
+          console.log('AutoFill (Page): SweetAlert error detected');
           clearInterval(checkInterval);
           
           // Click confirm button
@@ -376,7 +376,7 @@
     // Safety timeout after 30 seconds
     setTimeout(() => {
       clearInterval(checkInterval);
-      console.log('BPJS AutoFill (Page): Timeout waiting for response');
+      console.log('AutoFill (Page): Timeout waiting for response');
     }, 30000);
   }
 
@@ -392,7 +392,7 @@
         if (node.nodeType === Node.ELEMENT_NODE) {
           if (node.id === 'AppCaptcha_CaptchaImage' || 
               node.querySelector?.('#AppCaptcha_CaptchaImage')) {
-            console.log('BPJS AutoFill (Page): New CAPTCHA detected');
+            console.log('AutoFill (Page): New CAPTCHA detected');
             setTimeout(solveCaptcha, 500);
             return;
           }

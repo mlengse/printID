@@ -1,17 +1,22 @@
-// Script untuk mendeteksi pesan skrining kesehatan BPJS dan membuka iframe skrining
+// Script untuk mendeteksi pesan skrining kesehatan dan membuka iframe skrining
 
 (function() {
   'use strict';
 
-  // Fungsi untuk mendapatkan nomor BPJS dari halaman
-  function getNoBPJS() {
+  const CONFIG = typeof window.APP_CONFIG !== 'undefined' ? window.APP_CONFIG : {
+      SCREENING_URL: '',
+      API_VERIF: '',
+      MSG_SCREENING: ''
+  };
+
+  // Fungsi untuk mendapatkan nomor eksternal dari halaman
+  function getExternalId() {
     // Metode 1: Cari langsung dengan class nokartu
     const nokartuSpan = safeQuerySelector('span.nokartu');
     if (nokartuSpan) {
-      const noBPJS = nokartuSpan.textContent.trim().replace(/\s/g, '').replace(/&nbsp;/g, '');
-      if (noBPJS) {
-        // console.log('Nomor BPJS ditemukan (class nokartu):', noBPJS);
-        return noBPJS;
+      const extId = nokartuSpan.textContent.trim().replace(/\s/g, '').replace(/&nbsp;/g, '');
+      if (extId) {
+        return extId;
       }
     }
     
@@ -24,18 +29,16 @@
         if (labelText === 'No. Kartu' || labelText === 'No Kartu') {
           const span = safeQuerySelector('span', inputStatic);
           if (span) {
-            const noBPJS = span.textContent.trim().replace(/\s/g, '').replace(/&nbsp;/g, '');
-            if (noBPJS) {
-              // console.log('Nomor BPJS ditemukan (label No. Kartu):', noBPJS);
-              return noBPJS;
+            const extId = span.textContent.trim().replace(/\s/g, '').replace(/&nbsp;/g, '');
+            if (extId) {
+              return extId;
             }
           }
         }
       }
     }
     
-    console.error('Nomor BPJS tidak ditemukan dengan semua metode');
-    // console.log('Mencari span.nokartu:', safeQuerySelector('span.nokartu'));
+    console.error('ID tidak ditemukan dengan semua metode');
     return null;
   }
 
@@ -47,22 +50,19 @@
     return `${day}-${month}-${year}`;
   }
 
-  // Fungsi untuk melakukan verifikasi BPJS
-  async function verifikasiBPJS(noBPJS) {
+  // Fungsi untuk melakukan verifikasi layanan
+  async function verifyService(extId) {
     try {
       const today = formatDate(new Date());
-      const apiUrl = `/j-care/bpjs/apis/verifikasi/noka/${noBPJS}/${today}/001`;
-      
-      // console.log('Melakukan verifikasi BPJS:', apiUrl);
+      const apiUrl = `${CONFIG.API_VERIF}${extId}/${today}/001`;
       
       // Gunakan jQuery jika tersedia, karena server mungkin butuh header khusus dari jQuery
       if (typeof $ !== 'undefined' && $.getJSON) {
         return new Promise((resolve, reject) => {
           $.getJSON(apiUrl, function(data) {
-            // console.log('Data verifikasi BPJS:', data);
             resolve(data);
           }).fail(function(jqXHR, textStatus, errorThrown) {
-            console.error('Error verifikasi BPJS (jQuery):', textStatus, errorThrown);
+            console.error('Error verifikasi (jQuery):', textStatus, errorThrown);
             reject(new Error(textStatus));
           });
         });
@@ -83,18 +83,16 @@
         }
         
         const data = await response.json();
-        // console.log('Data verifikasi BPJS:', data);
-        
         return data;
       }
     } catch (error) {
-      console.error('Error verifikasi BPJS:', error);
+      console.error('Error verifikasi:', error);
       return null;
     }
   }
 
   // Fungsi untuk memeriksa apakah element mengandung pesan skrining
-  function checkForSkriningMessage() {
+  function checkForScreeningMessage() {
     const detailContainer = safeQuerySelector('.detail-container');
     
     if (!detailContainer) {
@@ -102,22 +100,21 @@
     }
 
     const containerText = detailContainer.textContent || detailContainer.innerText;
-    const skriningMessage = 'Anda belum melakukan skrining kesehatan. Mohon untuk melakukan skrining kesehatan terlebih dahulu pada menu Skrining Kesehatan.';
     
-    return containerText.includes(skriningMessage);
+    return containerText.includes(CONFIG.MSG_SCREENING);
   }
 
   // Fungsi untuk membuat loading indicator
   function createLoadingIndicator() {
     // Cek apakah sudah ada loading indicator
-    let existingLoader = safeGetById('bpjs-skrining-loader');
+    let existingLoader = safeGetById('health-screening-loader');
     if (existingLoader) {
       return existingLoader;
     }
 
     // Buat overlay
     const overlay = document.createElement('div');
-    overlay.id = 'bpjs-skrining-loader';
+    overlay.id = 'health-screening-loader';
     overlay.style.cssText = `
       position: fixed;
       top: 0;
@@ -145,8 +142,8 @@
 
     // Buat text
     const text = document.createElement('div');
-    text.id = 'bpjs-skrining-loader-text';
-    text.textContent = 'Memuat data BPJS...';
+    text.id = 'health-screening-loader-text';
+    text.textContent = 'Memuat data...';
     text.style.cssText = `
       color: white;
       font-size: 16px;
@@ -174,7 +171,7 @@
 
   // Fungsi untuk update text loading indicator
   function updateLoadingText(text) {
-    const loaderText = safeGetById('bpjs-skrining-loader-text');
+    const loaderText = safeGetById('health-screening-loader-text');
     if (loaderText) {
       loaderText.textContent = text;
     }
@@ -182,36 +179,35 @@
 
   // Fungsi untuk menghapus loading indicator
   function removeLoadingIndicator() {
-    const loader = safeGetById('bpjs-skrining-loader');
+    const loader = safeGetById('health-screening-loader');
     if (loader) {
       loader.remove();
     }
   }
 
   // Fungsi untuk membuka skrining di window baru
-  async function openSkriningWindow() {
+  async function openScreeningWindow() {
     // Tampilkan loading indicator
     createLoadingIndicator();
-    updateLoadingText('Mengambil nomor BPJS...');
+    updateLoadingText('Mengambil nomor...');
     
-    // Dapatkan nomor BPJS
-    const noBPJS = getNoBPJS();
-    if (!noBPJS) {
-      console.error('Nomor BPJS tidak ditemukan');
-      updateLoadingText('Error: Nomor BPJS tidak ditemukan');
+    // Dapatkan nomor ID
+    const extId = getExternalId();
+    if (!extId) {
+      console.error('Nomor tidak ditemukan');
+      updateLoadingText('Error: Nomor tidak ditemukan');
       setTimeout(removeLoadingIndicator, 2000);
       return;
     }
     
-    // console.log('Nomor BPJS ditemukan:', noBPJS);
-    updateLoadingText('Melakukan verifikasi BPJS...');
+    updateLoadingText('Melakukan verifikasi...');
     
-    // Lakukan verifikasi BPJS
-    const verifikasiData = await verifikasiBPJS(noBPJS);
+    // Lakukan verifikasi
+    const verifikasiData = await verifyService(extId);
     
     if (!verifikasiData) {
-      console.error('Gagal mendapatkan data verifikasi BPJS');
-      updateLoadingText('Gagal verifikasi BPJS, tetap membuka skrining...');
+      console.error('Gagal mendapatkan data verifikasi');
+      updateLoadingText('Gagal verifikasi, tetap membuka halaman...');
       // Tetap buka window meskipun gagal verifikasi
     } else {
       updateLoadingText('Verifikasi berhasil, menyimpan data...');
@@ -219,86 +215,53 @@
     
     // Simpan data ke chrome.storage untuk digunakan di window skrining (cross-domain)
     if (verifikasiData && typeof chrome !== 'undefined' && chrome.storage) {
-      const skriningData = {
+      const screeningData = {
         nik: verifikasiData.noKTP || verifikasiData.noKartu,
         tglLahir: verifikasiData.tglLahir,
         nama: verifikasiData.nama,
         timestamp: Date.now()
       };
-      chrome.storage.local.set({ 'bpjs-skrining-data': skriningData }, function() {
-        // console.log('Data skrining disimpan ke chrome.storage:', skriningData);
+      chrome.storage.local.set({ 'health-screening-data': screeningData }, function() {
+        // Data stored
       });
     }
     
-    const skriningUrl = 'https://webskrining.bpjs-kesehatan.go.id/skrining';
+    const screeningUrl = CONFIG.SCREENING_URL;
     
-    updateLoadingText('Membuka halaman skrining...');
+    updateLoadingText('Membuka halaman...');
     
     // Buka window baru dengan ukuran yang sesuai
     const windowFeatures = 'width=1200,height=800,left=100,top=100,resizable=yes,scrollbars=yes,status=yes';
-    const skriningWindow = window.open(skriningUrl, 'BPJSSkrining', windowFeatures);
+    const screeningWindow = window.open(screeningUrl, 'HealthScreening', windowFeatures);
     
-    if (skriningWindow) {
+    if (screeningWindow) {
       // Fokus ke window baru
-      skriningWindow.focus();
+      screeningWindow.focus();
       
-      // console.log('Window skrining BPJS berhasil dibuka');
-      updateLoadingText('Menunggu halaman skrining siap...');
+      updateLoadingText('Menunggu halaman siap...');
       
-      // Hapus loading setelah 3 detik (waktu untuk halaman skrining load)
+      // Hapus loading setelah 3 detik
       setTimeout(function() {
-        updateLoadingText('Halaman skrining berhasil dibuka!');
+        updateLoadingText('Halaman berhasil dibuka!');
         setTimeout(removeLoadingIndicator, 1000);
       }, 3000);
       
-      // Tunggu window selesai load, lalu isi form
-      if (verifikasiData) {
-        skriningWindow.addEventListener('load', function() {
-          fillSkriningForm(skriningWindow, verifikasiData);
-        });
-      }
     } else {
       // Jika popup diblokir, coba buka di tab baru
       console.warn('Popup mungkin diblokir, mencoba membuka di tab baru...');
       updateLoadingText('Popup diblokir, membuka tab baru...');
       
-      const newTab = window.open(skriningUrl, '_blank');
+      const newTab = window.open(screeningUrl, '_blank');
       
       if (newTab) {
         newTab.focus();
-        // console.log('Tab skrining BPJS berhasil dibuka');
-        updateLoadingText('Tab skrining berhasil dibuka!');
+        updateLoadingText('Tab berhasil dibuka!');
         setTimeout(removeLoadingIndicator, 2000);
       } else {
-        console.error('Gagal membuka window/tab skrining. Popup mungkin diblokir oleh browser.');
-        updateLoadingText('Error: Gagal membuka skrining. Popup diblokir!');
+        console.error('Gagal membuka window/tab. Popup mungkin diblokir oleh browser.');
+        updateLoadingText('Error: Gagal membuka. Popup diblokir!');
         setTimeout(removeLoadingIndicator, 3000);
       }
-    }
-  }
-  
-  // Fungsi untuk mengisi form skrining (tidak akan berfungsi karena cross-origin)
-  // Data akan diambil dari sessionStorage di window skrining
-  function fillSkriningForm(targetWindow, data) {
-    try {
-      const targetDoc = targetWindow.document;
-      const nikInput = safeQuerySelector('#nik_txt', targetDoc);
-      const tglLahirInput = safeQuerySelector('#TglLahir_src', targetDoc);
-      
-      if (nikInput && data.noKTP) {
-        nikInput.value = data.noKTP;
-      } else if (nikInput && data.noKartu) {
-        nikInput.value = data.noKartu;
-      }
-      
-      if (tglLahirInput && data.tglLahir) {
-        tglLahirInput.value = data.tglLahir;
-      }
-      
-      // console.log('Form skrining berhasil diisi');
-    } catch (error) {
-      console.error('Tidak dapat mengisi form karena cross-origin restriction:', error);
-      // console.log('Data tersimpan di localStorage dengan key "bpjs-skrining-data"');
     }
   }
 
@@ -306,16 +269,16 @@
   function init() {
     // Gunakan MutationObserver untuk mendeteksi perubahan pada .detail-container
     const observer = new MutationObserver(function(mutations) {
-      if (checkForSkriningMessage()) {
-        openSkriningWindow();
+      if (checkForScreeningMessage()) {
+        openScreeningWindow();
         // Hentikan observer setelah window dibuka
         observer.disconnect();
       }
     });
 
     // Cek segera saat script dijalankan
-    if (checkForSkriningMessage()) {
-      openSkriningWindow();
+    if (checkForScreeningMessage()) {
+      openScreeningWindow();
     } else {
       // Jika belum ada, tunggu perubahan DOM
       observer.observe(document.body, {

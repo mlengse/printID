@@ -1,16 +1,16 @@
 // Saves options to chrome.storage.local.
 function save_options() {
-  const jcareUrlInput = safeGetById('jcareUrl');
+  const systemUrlInput = safeGetById('systemUrl');
   const puskesmasNameInput = safeGetById('puskesmasName');
   const modelPathInput = safeGetById('modelPath');
   
-  if (!jcareUrlInput || !puskesmasNameInput) {
+  if (!systemUrlInput || !puskesmasNameInput) {
     console.error('[options.js] Required input elements not found');
     return;
   }
 
   const settings = {
-    jcareUrl: jcareUrlInput.value,
+    systemUrl: systemUrlInput.value,
     puskesmasName: puskesmasNameInput.value,
     modelPath: modelPathInput ? modelPathInput.value : ''
   };
@@ -30,15 +30,15 @@ function save_options() {
 // Restores options using the preferences stored in chrome.storage.
 function restore_options() {
   chrome.storage.local.get({
-    jcareUrl: '',
+    systemUrl: '',
     puskesmasName: '',
     modelPath: ''
   }, function(items) {
-    const jcareUrlInput = safeGetById('jcareUrl');
+    const systemUrlInput = safeGetById('systemUrl');
     const puskesmasNameInput = safeGetById('puskesmasName');
     const modelPathInput = safeGetById('modelPath');
     
-    if (jcareUrlInput) jcareUrlInput.value = items.jcareUrl;
+    if (systemUrlInput) systemUrlInput.value = items.systemUrl;
     if (puskesmasNameInput) puskesmasNameInput.value = items.puskesmasName;
     if (modelPathInput) modelPathInput.value = items.modelPath;
   });

@@ -1,5 +1,5 @@
 /**
- * BPJS CAPTCHA Solver using ONNX Runtime Web
+ * CAPTCHA Solver using ONNX Runtime Web
  * 
  * CNN-CTC End-to-End approach:
  * - Single model: captcha_ctc.onnx
@@ -7,8 +7,8 @@
  * - Output: 5-character sequence with CTC greedy decoding
  */
 
-// BPJS character mapping (26 characters) - must match training order!
-const BPJS_CHARS = '3456789ABCDEHJKMNPRSTUVWXY';
+// Character mapping (26 characters) - must match training order!
+const CHARS_MAP = '3456789ABCDEHJKMNPRSTUVWXY';
 const BLANK_INDEX = 26; // CTC blank token
 
 // Model configuration
@@ -33,12 +33,12 @@ let currentSettings = {
  */
 async function initializeSolver(modelBasePath = null) {
   if (isInitialized) {
-    console.log('BPJS Solver: Already initialized');
+    console.log('Solver: Already initialized');
     return true;
   }
 
   try {
-    console.log('BPJS Solver: Initializing ONNX Runtime Web (CTC mode)...');
+    console.log('Solver: Initializing ONNX Runtime Web (CTC mode)...');
     
     // Check if onnxruntime-web is available
     if (typeof ort === 'undefined') {
@@ -52,20 +52,20 @@ async function initializeSolver(modelBasePath = null) {
           chrome.storage.local.get({ modelPath: '' }, resolve);
         });
         currentSettings = items;
-        console.log('BPJS Solver: Settings loaded:', currentSettings);
+        console.log('Solver: Settings loaded:', currentSettings);
       } catch (e) {
-        console.warn('BPJS Solver: Could not load settings, using defaults');
+        console.warn('Solver: Could not load settings, using defaults');
       }
     }
 
     // Determine base path for models - use injected extension URL if available
-    const extensionRoot = window.__BPJS_EXTENSION_URL__ || 
+    const extensionRoot = window.__APP_EXTENSION_URL__ ||
       (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL ? chrome.runtime.getURL('') : './');
     
     const basePath = modelBasePath || currentSettings.modelPath || (extensionRoot + 'captcha-model/');
     
-    console.log('BPJS Solver: Extension root:', extensionRoot);
-    console.log('BPJS Solver: Using model path:', basePath);
+    console.log('Solver: Extension root:', extensionRoot);
+    console.log('Solver: Using model path:', basePath);
 
     // Configure ONNX Runtime - WASM files are in extension root
     ort.env.wasm.wasmPaths = extensionRoot;
@@ -76,21 +76,21 @@ async function initializeSolver(modelBasePath = null) {
     
     // Load CTC model
     const ctcModelPath = basePath + (basePath.endsWith('/') ? '' : '/') + 'captcha_ctc.onnx';
-    console.log('BPJS Solver: Loading CTC model...', ctcModelPath);
+    console.log('Solver: Loading CTC model...', ctcModelPath);
     ctcSession = await ort.InferenceSession.create(ctcModelPath, {
       executionProviders: ['wasm']  // Use wasm only, webgl can cause issues
     });
-    console.log('BPJS Solver: ✅ CTC model loaded');
-    console.log('BPJS Solver: Input names:', ctcSession.inputNames);
-    console.log('BPJS Solver: Output names:', ctcSession.outputNames);
+    console.log('Solver: ✅ CTC model loaded');
+    console.log('Solver: Input names:', ctcSession.inputNames);
+    console.log('Solver: Output names:', ctcSession.outputNames);
 
     isInitialized = true;
     initializationError = null;
-    console.log('BPJS Solver: ✅ Initialization complete (CTC mode)');
+    console.log('Solver: ✅ Initialization complete (CTC mode)');
     return true;
 
   } catch (error) {
-    console.error('BPJS Solver: ❌ Initialization failed:', error);
+    console.error('Solver: ❌ Initialization failed:', error);
     initializationError = (error && error.message) ? error.message : String(error);
     notifyUser('error', 'CAPTCHA Solver gagal dimuat: ' + initializationError);
     return false;
@@ -102,10 +102,10 @@ async function initializeSolver(modelBasePath = null) {
  */
 function notifyUser(type, message) {
   // Create or update notification element
-  let notifEl = document.getElementById('bpjs-solver-notification');
+  let notifEl = document.getElementById('solver-notification');
   if (!notifEl) {
     notifEl = document.createElement('div');
-    notifEl.id = 'bpjs-solver-notification';
+    notifEl.id = 'solver-notification';
     notifEl.style.cssText = `
       position: fixed;
       top: 10px;
@@ -218,8 +218,8 @@ function ctcGreedyDecode(logits) {
   
   // Convert indices to characters
   return decoded.map(idx => {
-    if (idx >= 0 && idx < BPJS_CHARS.length) {
-      return BPJS_CHARS[idx];
+    if (idx >= 0 && idx < CHARS_MAP.length) {
+      return CHARS_MAP[idx];
     }
     return '?';
   }).join('');
@@ -263,21 +263,21 @@ async function solveCaptcha(imageElement) {
     throw new Error('Solver not initialized. Call initializeSolver() first.');
   }
 
-  console.log('BPJS Solver: Starting CTC CAPTCHA prediction...');
+  console.log('Solver: Starting CTC CAPTCHA prediction...');
 
   try {
     // Step 1: Preprocess image
     const imageTensor = imageToTensor(imageElement);
 
     // Step 2: Run CTC inference with greedy decoding
-    console.log('BPJS Solver: Running CTC inference...');
+    console.log('Solver: Running CTC inference...');
     const result = await runCTCInference(imageTensor);
     
-    console.log('BPJS Solver: ✅ Prediction:', result);
+    console.log('Solver: ✅ Prediction:', result);
     return result;
 
   } catch (error) {
-    console.error('BPJS Solver: ❌ Prediction failed:', error);
+    console.error('Solver: ❌ Prediction failed:', error);
     throw error;
   }
 }
@@ -321,7 +321,7 @@ async function solveCaptchaFromBase64(base64Data) {
 
 // Export functions for use in extension
 if (typeof window !== 'undefined') {
-  window.BPJSCaptchaSolver = {
+  window.CaptchaSolver = {
     initialize: initializeSolver,
     solve: solveCaptcha,
     solveFromUrl: solveCaptchaFromUrl,
@@ -329,7 +329,7 @@ if (typeof window !== 'undefined') {
     isReady: () => isInitialized,
     getError: () => initializationError,
     notifyUser: notifyUser,
-    CHARS: BPJS_CHARS,
+    CHARS: CHARS_MAP,
     BLANK_INDEX: BLANK_INDEX
   };
 }

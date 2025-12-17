@@ -1,51 +1,51 @@
 # Changelog
 
-## [0.3.0] - 2025-11-25
+All notable changes to this project will be documented in this file.
 
-### Added
-- **BPJS Skrining Otomatis**: Ekstensi sekarang otomatis mendeteksi pesan skrining kesehatan BPJS dan membuka halaman skrining
-  - Auto-detect pesan "Anda belum melakukan skrining kesehatan" di halaman detail BPJS
-  - Otomatis mengambil nomor kartu BPJS dari halaman
-  - Melakukan verifikasi BPJS melalui API `/j-care/bpjs/apis/verifikasi/noka/`
-  - Membuka window baru ke https://webskrining.bpjs-kesehatan.go.id/skrining
-  - Auto-fill form skrining dengan NIK dan tanggal lahir dari data verifikasi
-  - Loading indicator dengan progress status yang detail
-  - Menggunakan chrome.storage untuk cross-domain data sharing
-  - Auto-cleanup data setelah digunakan atau setelah 5 menit
+## [0.4.0] - 2024-05-23
 
 ### Changed
-- Hardcoded "PKM Jayengan" di `content_script.js` diganti dengan `puskesmasName` dari chrome.storage settings
-- Improved error handling untuk verifikasi BPJS dengan jQuery AJAX dan fallback ke fetch API
+- **Obfuscation**: Refactored code to hide sensitive terms and URLs.
+- **Renamed Files**:
+    - `health_screening.js` (formerly `bpjs_skrining.js`)
+    - `health_screening_autofill.js` (formerly `bpjs_skrining_autofill_page.js`)
+    - `captcha_solver.js` (formerly `bpjs_captcha_solver.js`)
+- **Configuration**: Introduced `config.js` for managing obfuscated configuration values.
 
-### Technical
-- Created `bpjs_skrining.js` - Main script untuk deteksi dan verifikasi BPJS
-- Created `bpjs_skrining_autofill.js` - Script untuk auto-fill form skrining di website BPJS
-- Updated `background.js` untuk inject scripts di halaman BPJS detail dan skrining
-- Menggunakan MutationObserver untuk deteksi dinamis pesan skrining
-- Cross-domain data transfer menggunakan chrome.storage.local
-
-## [0.2.0] - 2025-11-25
-
-### Fixed
-- Fixed critical bug in `jsLabel2PDF.js` where assignment operators were used instead of comparison operators in conditional statements (`if (units="inches")` → `if (_units === "inches")`)
-- Improved error handling in background script with proper catch blocks
-
-### Changed
-- **Security Improvement**: Replaced global window variable injection (`window.EXTENSION_PUSKESMAS_NAME`) with secure `chrome.runtime.sendMessage`/`onMessage` pattern
-- Updated default Puskesmas name handling to use configurable settings from chrome.storage
+## [0.3.0] - 2024-05-22
 
 ### Added
-- Added helper functions for safer DOM querying with null checks: `safeQuerySelector`, `safeText`, `safeQuerySelectorAll`
-- Added development tooling: ESLint and Prettier configurations
-- Added `package.json` with npm scripts for linting and formatting
-- Added security best practices section in README
-- Added this CHANGELOG file
+- **CAPTCHA Solver Integration**:
+  - Added `captcha_solver.js` using ONNX Runtime Web
+  - Implemented CNN-CTC model inference for 5-character CAPTCHA
+  - Added `health_screening_autofill.js` for form automation
+  - Auto-fill NIK/DoB and auto-solve CAPTCHA on screening page
+  - Human-like typing simulation for CAPTCHA input
+  - Auto-click "Cari Peserta" and "Setuju" buttons
+  - Retry mechanism for failed CAPTCHA attempts
 
-### Developer Experience
-- Created `.eslintrc.json` for code quality enforcement
-- Created `.prettierrc.json` for consistent code formatting
-- Created `.eslintignore` and `.prettierignore` files
-- Added npm scripts: `lint`, `lint:fix`, `format`, `format:check`
+### Changed
+- **Skrining Otomatis**: Ekstensi sekarang otomatis mendeteksi pesan skrining kesehatan dan membuka halaman skrining
+  - Auto-detect pesan peringatan skrining di halaman detail
+  - Otomatis mengambil nomor kartu dari halaman
+  - Melakukan verifikasi melalui API internal
+  - Membuka window baru ke halaman skrining
+  - Pass data (NIK, DoB) to new window via `chrome.storage`
 
-## [0.1.0] - Previous releases
-- Initial release with basic patient ID and medication label printing functionality
+## [0.2.0] - 2024-05-21
+
+### Changed
+- Improved error handling untuk verifikasi dengan jQuery AJAX dan fallback ke fetch API
+- Added loading indicators
+
+### Added
+- Created `health_screening.js` - Main script untuk deteksi dan verifikasi
+- Created `health_screening_autofill.js` - Script untuk auto-fill form skrining di website target
+- Updated `background.js` untuk inject scripts
+
+## [0.1.0] - 2024-05-20
+
+### Added
+- Initial release
+- Print Patient ID Label feature
+- Print Drug Label feature

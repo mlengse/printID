@@ -1,11 +1,13 @@
+importScripts('config.js');
+
 chrome.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
   // Ensure the tab update is complete and the tab has a URL
   if (changeInfo.status === 'complete' && tab.url) {
-    chrome.storage.local.get(['jcareUrl', 'puskesmasName'], function(settings) {
-      const storedJcareUrl = settings.jcareUrl;
-      const storedPuskesmasName = settings.puskesmasName || 'PKM Default'; // Default if not set
+    chrome.storage.local.get(['systemUrl', 'puskesmasName'], function(settings) {
+      const storedSystemUrl = settings.systemUrl;
+      const storedPuskesmasName = settings.puskesmasName || 'Unit Default'; // Default if not set
 
-      if (storedJcareUrl && tab.url.startsWith(storedJcareUrl)) {
+      if (storedSystemUrl && tab.url.startsWith(storedSystemUrl)) {
         // Now check for specific paths for different scripts
         if (tab.url.includes('/visits')) { // Assuming '/visits' is part of the path for patient labels
           chrome.scripting.executeScript({
@@ -36,34 +38,34 @@ chrome.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
               'resep.js'
             ]
           }).catch(err => console.error('Failed to execute scripts:', err));
-        } else if (tab.url.includes('/j-care/bpjs/apis/detail/')) { // Path for BPJS detail page with screening check
+        } else if (tab.url.includes(self.APP_CONFIG.API_DETAIL)) { // Path for detail page with screening check
           chrome.scripting.executeScript({
             target: { tabId: tab.id },
-            files: ['domHelpers.js', 'bpjs_skrining.js']
-          }).catch(err => console.error('Failed to execute BPJS skrining script:', err));
+            files: ['config.js', 'domHelpers.js', 'health_screening.js']
+          }).catch(err => console.error('Failed to execute screening script:', err));
         }
       }
     });
     
-    // Inject CAPTCHA solver scripts to BPJS skrining website
-    if (tab.url && (tab.url.startsWith('https://webskrining.bpjs-kesehatan.go.id/skrining') || tab.url.includes('webskrining.bpjs-kesehatan.go.id'))) {
+    // Inject CAPTCHA solver scripts to screening website
+    if (tab.url && (tab.url.startsWith(self.APP_CONFIG.SCREENING_URL) || tab.url.includes(self.APP_CONFIG.SCREENING_URL.replace('https://', '')))) {
       const extensionUrl = chrome.runtime.getURL('');
       
-      // Get skrining data from storage
-      chrome.storage.local.get(['bpjs-skrining-data'], (result) => {
-        const skriningData = result['bpjs-skrining-data'] || null;
-        console.log('Skrining data from storage:', skriningData);
+      // Get screening data from storage
+      chrome.storage.local.get(['health-screening-data'], (result) => {
+        const screeningData = result['health-screening-data'] || null;
+        console.log('Screening data from storage:', screeningData);
         
-        // First, inject the extension URL and skrining data as global variables
+        // First, inject the extension URL and screening data as global variables
         chrome.scripting.executeScript({
           target: { tabId: tab.id },
           func: (url, data) => {
-            window.__BPJS_EXTENSION_URL__ = url;
-            window.__BPJS_SKRINING_DATA__ = data;
-            console.log('BPJS Extension URL set:', url);
-            console.log('BPJS Skrining Data set:', data);
+            window.__APP_EXTENSION_URL__ = url;
+            window.__HEALTH_SCREENING_DATA__ = data;
+            console.log('Extension URL set:', url);
+            console.log('Screening Data set:', data);
           },
-          args: [extensionUrl, skriningData],
+          args: [extensionUrl, screeningData],
           world: 'MAIN'
         }).then(() => {
         console.log('Extension URL injected, now injecting ONNX Runtime...');
@@ -78,7 +80,7 @@ chrome.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
         // Then inject solver
         return chrome.scripting.executeScript({
           target: { tabId: tab.id },
-          files: ['bpjs_captcha_solver.js'],
+          files: ['config.js', 'captcha_solver.js'],
           world: 'MAIN'
         });
       }).then(() => {
@@ -86,12 +88,12 @@ chrome.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
         // Finally inject autofill
         return chrome.scripting.executeScript({
           target: { tabId: tab.id },
-          files: ['bpjs_skrining_autofill_page.js'],
+          files: ['health_screening_autofill.js'],
           world: 'MAIN'
         });
       }).then(() => {
-        console.log('All BPJS CAPTCHA solver scripts injected successfully');
-      }).catch(err => console.error('Failed to execute BPJS solver scripts:', err));
+        console.log('All CAPTCHA solver scripts injected successfully');
+      }).catch(err => console.error('Failed to execute solver scripts:', err));
       }); // Close chrome.storage.local.get callback
     }
   }
