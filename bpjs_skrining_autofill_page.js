@@ -278,18 +278,18 @@
     }, 5000);
   }
 
-  // Function to watch for and click Setuju button
+  // Function to watch for and click Setuju button OR handle error modal
   function watchForSetujuButton() {
-    console.log('BPJS AutoFill (Page): Watching for Setuju button...');
+    console.log('BPJS AutoFill (Page): Watching for Setuju button or error modal...');
     
-    const checkSetuju = setInterval(() => {
-      // Look for button with text containing 'Setuju' or 'setuju'
+    const checkInterval = setInterval(() => {
+      // Check for Setuju button
       const buttons = document.querySelectorAll('button, input[type="button"], a.btn');
       for (const btn of buttons) {
         const text = btn.textContent || btn.value || '';
         if (text.toLowerCase().includes('setuju')) {
           console.log('BPJS AutoFill (Page): Found Setuju button:', text);
-          clearInterval(checkSetuju);
+          clearInterval(checkInterval);
           
           // Click with delay
           setTimeout(() => {
@@ -301,10 +301,83 @@
           return;
         }
       }
+      
+      // Check for error modal (captcha salah)
+      // Look for modal containing "captcha" and "salah" text
+      const modals = document.querySelectorAll('.modal, .swal2-container, [role="dialog"], .bootbox');
+      for (const modal of modals) {
+        const modalText = modal.textContent || '';
+        if (modalText.toLowerCase().includes('captcha') && 
+            (modalText.toLowerCase().includes('salah') || modalText.toLowerCase().includes('wrong'))) {
+          console.log('BPJS AutoFill (Page): Error modal detected - CAPTCHA salah');
+          clearInterval(checkInterval);
+          
+          // Find and click OK button in modal
+          const okButtons = modal.querySelectorAll('button, input[type="button"], .btn');
+          for (const okBtn of okButtons) {
+            const btnText = okBtn.textContent || okBtn.value || '';
+            if (btnText.toLowerCase().includes('ok') || 
+                btnText.toLowerCase().includes('tutup') ||
+                btnText.toLowerCase().includes('close')) {
+              console.log('BPJS AutoFill (Page): Clicking OK button...');
+              okBtn.click();
+              break;
+            }
+          }
+          
+          showNotification('warning', 'CAPTCHA salah, mencoba lagi...');
+          
+          // Wait for modal to close, then retry
+          setTimeout(() => {
+            // Reset state and re-enable observer
+            captchaSolved = false;
+            
+            if (captchaObserver) {
+              captchaObserver.observe(document.body, { childList: true, subtree: true });
+              console.log('BPJS AutoFill (Page): Observer re-enabled');
+            }
+            
+            // Try solving again
+            solveCaptcha();
+          }, 1000);
+          return;
+        }
+      }
+      
+      // Also check for SweetAlert2 or other alert dialogs
+      const swalTitle = document.querySelector('.swal2-title, .bootbox-body, .modal-body');
+      if (swalTitle) {
+        const titleText = swalTitle.textContent || '';
+        if (titleText.toLowerCase().includes('captcha') && 
+            (titleText.toLowerCase().includes('salah') || titleText.toLowerCase().includes('wrong'))) {
+          console.log('BPJS AutoFill (Page): SweetAlert error detected');
+          clearInterval(checkInterval);
+          
+          // Click confirm button
+          const confirmBtn = document.querySelector('.swal2-confirm, .bootbox-accept, .btn-primary');
+          if (confirmBtn) {
+            confirmBtn.click();
+          }
+          
+          showNotification('warning', 'CAPTCHA salah, mencoba lagi...');
+          
+          setTimeout(() => {
+            captchaSolved = false;
+            if (captchaObserver) {
+              captchaObserver.observe(document.body, { childList: true, subtree: true });
+            }
+            solveCaptcha();
+          }, 1000);
+          return;
+        }
+      }
     }, 500);
     
-    // Stop checking after 30 seconds
-    setTimeout(() => clearInterval(checkSetuju), 30000);
+    // Safety timeout after 30 seconds
+    setTimeout(() => {
+      clearInterval(checkInterval);
+      console.log('BPJS AutoFill (Page): Timeout waiting for response');
+    }, 30000);
   }
 
   // Start solving
@@ -328,6 +401,6 @@
     }
   });
 
-  observer.observe(document.body, { childList: true, subtree: true });
+  captchaObserver.observe(document.body, { childList: true, subtree: true });
 
 })();
