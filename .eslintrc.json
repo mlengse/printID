@@ -1,0 +1,53 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "webextensions": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "prettier"
+  ],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "script"
+  },
+  "globals": {
+    "chrome": "readonly",
+    "$": "readonly",
+    "jQuery": "readonly",
+    "drawBarcode": "readonly",
+    "Base64": "readonly",
+    "sprintf": "readonly",
+    "safeQuerySelector": "readonly",
+    "safeQuerySelectorAll": "readonly",
+    "safeText": "readonly",
+    "safeAttr": "readonly",
+    "safeGetById": "readonly",
+    "waitForElement": "readonly"
+  },
+  "rules": {
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "eqeqeq": ["error", "always"],
+    "no-var": "warn",
+    "prefer-const": "warn",
+    "no-undef": "error",
+    "no-inner-declarations": "off",
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "CallExpression[callee.object.name='document'][callee.property.name='querySelector']",
+        "message": "Use safeQuerySelector() instead of document.querySelector() for better error handling."
+      },
+      {
+        "selector": "CallExpression[callee.object.name='document'][callee.property.name='querySelectorAll']",
+        "message": "Use safeQuerySelectorAll() instead of document.querySelectorAll() for better error handling."
+      },
+      {
+        "selector": "CallExpression[callee.object.name='document'][callee.property.name='getElementById']",
+        "message": "Use safeGetById() instead of document.getElementById() for better error handling."
+      }
+    ]
+  }
+}

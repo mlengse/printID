@@ -1,0 +1,42 @@
+{
+  "name": "Print ID",
+  "description": "Cetak label identitas pasien untuk diprint di stiker identitas berdasarkan registrasi sistem",
+  "version": "0.4.1",
+  "background": {
+    "service_worker": "background.min.js"
+  },
+  "permissions": [
+    "storage",
+    "scripting",
+    "tabs"
+  ],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "action": {
+      "default_title": "Print ID",
+      "default_icon": "print_16x16.png"
+  },
+  "manifest_version": 3,
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "config.min.js",
+        "print_16x16.png", 
+        "drug_16x16.png",
+        "captcha-model/*",
+        "ort.min.js",
+        "ort-wasm*.wasm",
+        "ort-wasm*.mjs",
+        "captcha_solver.min.js",
+        "health_screening_autofill.min.js"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
